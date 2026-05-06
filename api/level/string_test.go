@@ -14,11 +14,13 @@
    limitations under the License.
 */
 
-package level
+package level_test
 
 import (
 	"fmt"
 	"testing"
+
+	"arcoris.dev/arclog/api/level"
 )
 
 // TestLevelString verifies the canonical lowercase representation used for
@@ -28,19 +30,19 @@ func TestLevelString(t *testing.T) {
 
 	tests := []struct {
 		name string
-		lvl  Level
+		lvl  level.Level
 		want string
 	}{
-		{"trace", Trace, "trace"},
-		{"debug", Debug, "debug"},
-		{"info", Info, "info"},
-		{"notice", Notice, "notice"},
-		{"warn", Warn, "warn"},
-		{"error", Error, "error"},
-		{"critical", Critical, "critical"},
-		{"fatal", Fatal, "fatal"},
-		{"panic", Panic, "panic"},
-		{"invalid", Invalid, "invalid"},
+		{"trace", level.Trace, "trace"},
+		{"debug", level.Debug, "debug"},
+		{"info", level.Info, "info"},
+		{"notice", level.Notice, "notice"},
+		{"warn", level.Warn, "warn"},
+		{"error", level.Error, "error"},
+		{"critical", level.Critical, "critical"},
+		{"fatal", level.Fatal, "fatal"},
+		{"panic", level.Panic, "panic"},
+		{"invalid", level.Invalid, "invalid"},
 	}
 
 	for _, tt := range tests {
@@ -60,7 +62,7 @@ func TestLevelString(t *testing.T) {
 func TestLevelStringUnknown(t *testing.T) {
 	t.Parallel()
 
-	unknown := Level(42)
+	unknown := level.Level(42)
 	want := fmt.Sprintf("Level(%d)", int8(unknown))
 	if got := unknown.String(); got != want {
 		t.Fatalf("String() = %q, want %q", got, want)

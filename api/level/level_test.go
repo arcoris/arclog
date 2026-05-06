@@ -14,10 +14,12 @@
    limitations under the License.
 */
 
-package level
+package level_test
 
 import (
 	"testing"
+
+	"arcoris.dev/arclog/api/level"
 )
 
 // TestLevelOrdering documents the severity ordering that filtering code relies
@@ -25,16 +27,16 @@ import (
 func TestLevelOrdering(t *testing.T) {
 	t.Parallel()
 
-	ordered := []Level{
-		Trace,
-		Debug,
-		Info,
-		Notice,
-		Warn,
-		Error,
-		Critical,
-		Fatal,
-		Panic,
+	ordered := []level.Level{
+		level.Trace,
+		level.Debug,
+		level.Info,
+		level.Notice,
+		level.Warn,
+		level.Error,
+		level.Critical,
+		level.Fatal,
+		level.Panic,
 	}
 
 	for i := 1; i < len(ordered); i++ {
@@ -43,8 +45,8 @@ func TestLevelOrdering(t *testing.T) {
 		}
 	}
 
-	if !(Invalid > Panic) {
-		t.Fatalf("Invalid = %d, want greater than Panic = %d", Invalid, Panic)
+	if !(level.Invalid > level.Panic) {
+		t.Fatalf("Invalid = %d, want greater than Panic = %d", level.Invalid, level.Panic)
 	}
 }
 
@@ -54,21 +56,21 @@ func TestLevelIsValid(t *testing.T) {
 
 	tests := []struct {
 		name string
-		lvl  Level
+		lvl  level.Level
 		want bool
 	}{
-		{"trace", Trace, true},
-		{"debug", Debug, true},
-		{"info", Info, true},
-		{"notice", Notice, true},
-		{"warn", Warn, true},
-		{"error", Error, true},
-		{"critical", Critical, true},
-		{"fatal", Fatal, true},
-		{"panic", Panic, true},
-		{"invalid", Invalid, false},
-		{"below-range", Level(-100), false},
-		{"above-range", Level(100), false},
+		{"trace", level.Trace, true},
+		{"debug", level.Debug, true},
+		{"info", level.Info, true},
+		{"notice", level.Notice, true},
+		{"warn", level.Warn, true},
+		{"error", level.Error, true},
+		{"critical", level.Critical, true},
+		{"fatal", level.Fatal, true},
+		{"panic", level.Panic, true},
+		{"invalid", level.Invalid, false},
+		{"below-range", level.Level(-100), false},
+		{"above-range", level.Level(100), false},
 	}
 
 	for _, tt := range tests {

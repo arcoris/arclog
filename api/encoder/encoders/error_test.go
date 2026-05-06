@@ -46,6 +46,29 @@ func TestAddErrorNil(t *testing.T) {
 	}
 }
 
+func TestAddErrorTypedNil(t *testing.T) {
+	t.Parallel()
+
+	var err *nilError
+	dst := buffer.New(0)
+	got := encoders.AddError(dst, testEncoder{}, "error", err)
+
+	if got.String() != "error=;" {
+		t.Fatalf("buffer = %q, want %q", got.String(), "error=;")
+	}
+}
+
+func TestAppendError(t *testing.T) {
+	t.Parallel()
+
+	dst := buffer.New(0)
+	got := encoders.AppendError(dst, testEncoder{}, errors.New("failed"))
+
+	if got.String() != "failed;" {
+		t.Fatalf("buffer = %q, want %q", got.String(), "failed;")
+	}
+}
+
 func TestAddErrorSafeRecoversPanic(t *testing.T) {
 	t.Parallel()
 
@@ -57,8 +80,16 @@ func TestAddErrorSafeRecoversPanic(t *testing.T) {
 	}
 }
 
+// panicError verifies the safe helper's recovery path.
 type panicError struct{}
 
 func (panicError) Error() string {
 	panic("boom")
+}
+
+// nilError verifies typed-nil error handling without invoking Error.
+type nilError struct{}
+
+func (*nilError) Error() string {
+	return "unreachable"
 }

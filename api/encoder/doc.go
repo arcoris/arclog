@@ -14,8 +14,8 @@
    limitations under the License.
 */
 
-// Package encoder defines the stable encoder-side contracts used by arclog API
-// packages.
+// Package encoder defines stable encoder-side contracts used by arclog API
+// packages and third-party extensions.
 //
 // The package is intentionally limited to contracts that must be shared between
 // field constructors, custom field marshalers, and concrete encoder
@@ -29,6 +29,11 @@
 // Concrete JSON, console, or binary encoders belong in runtime packages. This
 // package only specifies the object and array write contracts that those
 // implementations expose to API-level marshalers.
+//
+// The package depends on buffer and deliberately does not depend on field. That
+// direction keeps the API graph acyclic for future field dispatch code:
+// field-like packages may call encoder contracts, while encoder contracts stay
+// independent from concrete field representations.
 //
 // # Buffer ownership
 //
@@ -46,6 +51,6 @@
 // # Error model
 //
 // Primitive append operations do not return errors. Structured operations that
-// execute user-provided marshalers return an error so implementations can
-// propagate marshaling failures to the caller.
+// execute user-provided marshalers or reflection paths return an error so
+// implementations can propagate marshaling failures to the caller.
 package encoder

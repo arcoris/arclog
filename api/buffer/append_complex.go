@@ -38,6 +38,8 @@ func (b *Buffer) AppendComplex64(v complex64) {
 	appendComplex(b, float64(real(v)), float64(imag(v)), 32)
 }
 
+// appendComplex centralizes complex-number formatting so the complex64 and
+// complex128 paths keep identical sign handling.
 func appendComplex(b *Buffer, realPart, imagPart float64, bitSize int) {
 	b.data = strconv.AppendFloat(b.data, realPart, 'g', -1, bitSize)
 	if !math.Signbit(imagPart) {

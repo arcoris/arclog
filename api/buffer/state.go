@@ -26,6 +26,10 @@ func (b *Buffer) Bytes() []byte {
 }
 
 // String returns the current contents of the buffer as a string.
+//
+// The returned string is a snapshot of the current bytes. Callers should assume
+// that the conversion may allocate and should prefer Bytes when they can consume
+// a borrowed byte slice safely.
 func (b *Buffer) String() string {
 	return string(b.data)
 }

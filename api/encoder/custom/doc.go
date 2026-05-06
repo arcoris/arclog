@@ -16,7 +16,11 @@
 
 // Package custom defines extension contracts for encoder-specific type handling.
 //
-// This package is intentionally small. It exists for runtime encoders that want
-// to expose explicit type hooks without forcing those hooks into the core
+// This package is intentionally small. It exists for runtime encoders that
+// expose explicit type hooks without forcing those hooks into the core
 // ObjectEncoder or ArrayEncoder interfaces.
+//
+// The package is not a registry and does not select encoders by Go type. Type
+// matching, caching, fallback order, and configuration belong to the runtime
+// encoder or field dispatch layer that calls these contracts.
 package custom

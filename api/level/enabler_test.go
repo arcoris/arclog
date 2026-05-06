@@ -14,27 +14,29 @@
    limitations under the License.
 */
 
-package level
+package level_test
 
 import (
 	"testing"
+
+	"arcoris.dev/arclog/api/level"
 )
 
-var _ Enabler = EnablerFunc(nil)
+var _ level.Enabler = level.EnablerFunc(nil)
 
 // TestEnablerFunc verifies the function adapter without relying on package
 // internals.
 func TestEnablerFunc(t *testing.T) {
 	t.Parallel()
 
-	enabler := EnablerFunc(func(lvl Level) bool {
-		return lvl.Enabled(Warn)
+	enabler := level.EnablerFunc(func(lvl level.Level) bool {
+		return lvl.Enabled(level.Warn)
 	})
 
-	if enabler.Enabled(Info) {
+	if enabler.Enabled(level.Info) {
 		t.Fatalf("Info should be disabled at Warn threshold")
 	}
-	if !enabler.Enabled(Error) {
+	if !enabler.Enabled(level.Error) {
 		t.Fatalf("Error should be enabled at Warn threshold")
 	}
 }
@@ -49,6 +51,6 @@ func TestEnablerFuncNilPanics(t *testing.T) {
 		}
 	}()
 
-	var enabler EnablerFunc
-	_ = enabler.Enabled(Info)
+	var enabler level.EnablerFunc
+	_ = enabler.Enabled(level.Info)
 }

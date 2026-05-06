@@ -14,11 +14,13 @@
    limitations under the License.
 */
 
-package level
+package level_test
 
 import (
 	"fmt"
 	"testing"
+
+	"arcoris.dev/arclog/api/level"
 )
 
 // TestLevelEnabled verifies the inclusive threshold rule used by arclog.
@@ -26,33 +28,33 @@ func TestLevelEnabled(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		lvl       Level
-		threshold Level
+		lvl       level.Level
+		threshold level.Level
 		want      bool
 	}{
-		{Trace, Trace, true},
-		{Debug, Debug, true},
-		{Info, Info, true},
-		{Notice, Notice, true},
-		{Warn, Warn, true},
-		{Error, Error, true},
-		{Critical, Critical, true},
-		{Fatal, Fatal, true},
-		{Panic, Panic, true},
-		{Error, Info, true},
-		{Warn, Info, true},
-		{Critical, Error, true},
-		{Fatal, Critical, true},
-		{Panic, Fatal, true},
-		{Debug, Info, false},
-		{Trace, Debug, false},
-		{Info, Warn, false},
-		{Warn, Error, false},
-		{Error, Fatal, false},
-		{Invalid, Info, false},
-		{Error, Invalid, false},
-		{Level(42), Info, false},
-		{Error, Level(42), false},
+		{level.Trace, level.Trace, true},
+		{level.Debug, level.Debug, true},
+		{level.Info, level.Info, true},
+		{level.Notice, level.Notice, true},
+		{level.Warn, level.Warn, true},
+		{level.Error, level.Error, true},
+		{level.Critical, level.Critical, true},
+		{level.Fatal, level.Fatal, true},
+		{level.Panic, level.Panic, true},
+		{level.Error, level.Info, true},
+		{level.Warn, level.Info, true},
+		{level.Critical, level.Error, true},
+		{level.Fatal, level.Critical, true},
+		{level.Panic, level.Fatal, true},
+		{level.Debug, level.Info, false},
+		{level.Trace, level.Debug, false},
+		{level.Info, level.Warn, false},
+		{level.Warn, level.Error, false},
+		{level.Error, level.Fatal, false},
+		{level.Invalid, level.Info, false},
+		{level.Error, level.Invalid, false},
+		{level.Level(42), level.Info, false},
+		{level.Error, level.Level(42), false},
 	}
 
 	for _, tt := range tests {
@@ -72,19 +74,19 @@ func TestLevelHigher(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		lvl   Level
-		other Level
+		lvl   level.Level
+		other level.Level
 		want  bool
 	}{
-		{Info, Info, false},
-		{Error, Warn, true},
-		{Warn, Info, true},
-		{Fatal, Error, true},
-		{Panic, Fatal, true},
-		{Trace, Debug, false},
-		{Debug, Info, false},
-		{Invalid, Info, false},
-		{Error, Invalid, false},
+		{level.Info, level.Info, false},
+		{level.Error, level.Warn, true},
+		{level.Warn, level.Info, true},
+		{level.Fatal, level.Error, true},
+		{level.Panic, level.Fatal, true},
+		{level.Trace, level.Debug, false},
+		{level.Debug, level.Info, false},
+		{level.Invalid, level.Info, false},
+		{level.Error, level.Invalid, false},
 	}
 
 	for _, tt := range tests {
@@ -104,19 +106,19 @@ func TestLevelLower(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		lvl   Level
-		other Level
+		lvl   level.Level
+		other level.Level
 		want  bool
 	}{
-		{Info, Info, false},
-		{Trace, Debug, true},
-		{Debug, Info, true},
-		{Info, Warn, true},
-		{Error, Fatal, true},
-		{Fatal, Error, false},
-		{Panic, Fatal, false},
-		{Invalid, Info, false},
-		{Error, Invalid, false},
+		{level.Info, level.Info, false},
+		{level.Trace, level.Debug, true},
+		{level.Debug, level.Info, true},
+		{level.Info, level.Warn, true},
+		{level.Error, level.Fatal, true},
+		{level.Fatal, level.Error, false},
+		{level.Panic, level.Fatal, false},
+		{level.Invalid, level.Info, false},
+		{level.Error, level.Invalid, false},
 	}
 
 	for _, tt := range tests {

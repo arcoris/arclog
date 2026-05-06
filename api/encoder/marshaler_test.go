@@ -14,17 +14,62 @@
    limitations under the License.
 */
 
-package encoders_test
+package encoder_test
 
 import (
+	"testing"
 	"time"
 
 	"arcoris.dev/arclog/api/buffer"
 	"arcoris.dev/arclog/api/encoder"
 )
 
+func TestObjectMarshalerFunc(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	marshaler := encoder.ObjectMarshalerFunc(func(dst *buffer.Buffer, enc encoder.ObjectEncoder) (*buffer.Buffer, error) {
+		called = true
+		return enc.AddString(dst, "name", "arcoris"), nil
+	})
+
+	dst := buffer.New(0)
+	got, err := marshaler.MarshalLogObject(dst, testEncoder{})
+	if err != nil {
+		t.Fatalf("MarshalLogObject returned error: %v", err)
+	}
+	if !called {
+		t.Fatal("MarshalLogObject did not call adapter function")
+	}
+	if got.String() != "name=arcoris;" {
+		t.Fatalf("buffer = %q, want %q", got.String(), "name=arcoris;")
+	}
+}
+
+func TestArrayMarshalerFunc(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	marshaler := encoder.ArrayMarshalerFunc(func(dst *buffer.Buffer, enc encoder.ArrayEncoder) (*buffer.Buffer, error) {
+		called = true
+		return enc.AppendString(dst, "arcoris"), nil
+	})
+
+	dst := buffer.New(0)
+	got, err := marshaler.MarshalLogArray(dst, testEncoder{})
+	if err != nil {
+		t.Fatalf("MarshalLogArray returned error: %v", err)
+	}
+	if !called {
+		t.Fatal("MarshalLogArray did not call adapter function")
+	}
+	if got.String() != "arcoris;" {
+		t.Fatalf("buffer = %q, want %q", got.String(), "arcoris;")
+	}
+}
+
 // testEncoder records string fields and elements while stubbing the rest of the
-// object and array contracts used by helper tests.
+// object and array contracts needed by marshaler adapter tests.
 type testEncoder struct{}
 
 var _ encoder.ObjectEncoder = testEncoder{}

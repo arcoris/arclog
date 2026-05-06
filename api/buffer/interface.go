@@ -21,20 +21,23 @@ import (
 	"time"
 )
 
-// Interface describes the buffer operations required by ARCORIS logging
-// encoders and logging cores.
+// Interface describes the append-oriented byte buffer operations required by
+// ARCORIS logging encoders and logging cores.
 //
-// Implementations SHOULD be backed by contiguous byte storage and SHOULD avoid
-// allocations for appending primitive values when sufficient capacity is
-// available. Unless an implementation explicitly documents stronger guarantees,
-// Interface values are not safe for concurrent use.
+// Implementations SHOULD be backed by mutable byte storage and SHOULD preserve
+// Buffer's single-owner lifecycle semantics: bytes returned by Bytes are
+// borrowed, writes append to the current logical contents, Reset clears the
+// logical contents without promising to release capacity, and Free releases the
+// value to its owner if it has one. Unless an implementation explicitly
+// documents stronger guarantees, Interface values are not safe for concurrent
+// mutation.
 type Interface interface {
 	io.Writer
 
-	// WriteByte appends a single byte and reports success.
+	// WriteByte appends a single byte and reports success or failure.
 	WriteByte(v byte) error
 
-	// WriteString appends s and reports a full write.
+	// WriteString appends s and reports the number of bytes accepted.
 	WriteString(s string) (int, error)
 
 	// AppendTime appends t formatted with layout.
@@ -100,7 +103,10 @@ type Interface interface {
 	// AppendUintptr appends v as a lowercase hexadecimal pointer-sized value.
 	AppendUintptr(v uintptr)
 
-	// Bytes returns a borrowed, read-only view of the current contents.
+	// Bytes returns a borrowed view of the current contents.
+	//
+	// Callers MUST treat the returned slice as read-only and MUST NOT retain it
+	// after the next mutation, Reset, Free, or pool return.
 	Bytes() []byte
 
 	// Len reports the current number of bytes in the buffer.

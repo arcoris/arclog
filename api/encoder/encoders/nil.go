@@ -23,6 +23,9 @@ import "reflect"
 // The helper exists because interface values can contain typed nil pointers,
 // maps, slices, functions, channels, or interfaces. Direct comparison with nil
 // only catches an untyped nil interface.
+//
+// Non-nil scalar values, structs, and arrays always report false. IsNil does
+// not call methods on value.
 func IsNil(value any) bool {
 	if value == nil {
 		return true

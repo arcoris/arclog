@@ -27,6 +27,8 @@ import (
 //
 // Nil and typed-nil errors are encoded as an empty string. This keeps the
 // helper total and prevents logging paths from panicking on nil error values.
+// Non-nil errors are converted by calling err.Error directly; panics from Error
+// propagate to the caller.
 func AddError(dst *buffer.Buffer, enc encoder.ObjectEncoder, key string, err error) *buffer.Buffer {
 	if IsNil(err) {
 		return enc.AddString(dst, key, "")
@@ -36,6 +38,8 @@ func AddError(dst *buffer.Buffer, enc encoder.ObjectEncoder, key string, err err
 }
 
 // AppendError appends an error value as a string array element.
+//
+// It follows the same nil and panic behavior as AddError.
 func AppendError(dst *buffer.Buffer, enc encoder.ArrayEncoder, err error) *buffer.Buffer {
 	if IsNil(err) {
 		return enc.AppendString(dst, "")
@@ -49,7 +53,7 @@ func AppendError(dst *buffer.Buffer, enc encoder.ArrayEncoder, err error) *buffe
 //
 // Error implementations should not panic, but logging must not let a broken
 // error value crash the log path unless the caller explicitly chooses that
-// policy.
+// policy. The recovered value is encoded as "PANIC=<value>".
 func AddErrorSafe(dst *buffer.Buffer, enc encoder.ObjectEncoder, key string, err error) (out *buffer.Buffer) {
 	defer func() {
 		if recovered := recover(); recovered != nil {

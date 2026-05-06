@@ -14,27 +14,31 @@
    limitations under the License.
 */
 
-package level
+package level_test
 
 import (
 	"testing"
+
+	"arcoris.dev/arclog/api/level"
 )
 
-var _ Threshold = (*testThreshold)(nil)
+var _ level.Threshold = (*testThreshold)(nil)
 
+// testThreshold is a minimal Threshold implementation used to verify the public
+// interface without importing a runtime threshold.
 type testThreshold struct {
-	lvl Level
+	lvl level.Level
 }
 
-func (t *testThreshold) Enabled(lvl Level) bool {
+func (t *testThreshold) Enabled(lvl level.Level) bool {
 	return lvl.Enabled(t.lvl)
 }
 
-func (t *testThreshold) Level() Level {
+func (t *testThreshold) Level() level.Level {
 	return t.lvl
 }
 
-func (t *testThreshold) SetLevel(lvl Level) {
+func (t *testThreshold) SetLevel(lvl level.Level) {
 	t.lvl = lvl
 }
 
@@ -43,19 +47,19 @@ func (t *testThreshold) SetLevel(lvl Level) {
 func TestThresholdContract(t *testing.T) {
 	t.Parallel()
 
-	threshold := &testThreshold{lvl: Info}
-	if !threshold.Enabled(Error) {
+	threshold := &testThreshold{lvl: level.Info}
+	if !threshold.Enabled(level.Error) {
 		t.Fatalf("Error should be enabled at Info threshold")
 	}
-	if threshold.Enabled(Debug) {
+	if threshold.Enabled(level.Debug) {
 		t.Fatalf("Debug should be disabled at Info threshold")
 	}
 
-	threshold.SetLevel(Warn)
-	if threshold.Level() != Warn {
-		t.Fatalf("Level() = %v, want %v", threshold.Level(), Warn)
+	threshold.SetLevel(level.Warn)
+	if threshold.Level() != level.Warn {
+		t.Fatalf("Level() = %v, want %v", threshold.Level(), level.Warn)
 	}
-	if threshold.Enabled(Info) {
+	if threshold.Enabled(level.Info) {
 		t.Fatalf("Info should be disabled at Warn threshold")
 	}
 }

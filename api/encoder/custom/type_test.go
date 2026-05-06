@@ -47,6 +47,8 @@ func TestTypeEncoderFunc(t *testing.T) {
 	}
 }
 
+// testObjectEncoder records string fields and stubs the remaining object
+// methods required by the public ObjectEncoder interface.
 type testObjectEncoder struct{}
 
 func (testObjectEncoder) AddString(dst *buffer.Buffer, key string, value string) *buffer.Buffer {

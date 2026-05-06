@@ -24,13 +24,19 @@ import (
 )
 
 // Stringer is the minimal fmt.Stringer-compatible contract used by helpers.
+//
+// The interface is defined locally so callers can use these helpers without
+// importing fmt at call sites.
 type Stringer interface {
+	// String returns the textual representation to encode.
 	String() string
 }
 
 // AddStringer appends a fmt.Stringer-compatible value as a string field.
 //
-// Nil and typed-nil values are encoded as an empty string.
+// Nil and typed-nil values are encoded as an empty string. Non-nil values are
+// converted by calling String directly; panics from String propagate to the
+// caller.
 func AddStringer(dst *buffer.Buffer, enc encoder.ObjectEncoder, key string, value Stringer) *buffer.Buffer {
 	if IsNil(value) {
 		return enc.AddString(dst, key, "")
@@ -40,6 +46,8 @@ func AddStringer(dst *buffer.Buffer, enc encoder.ObjectEncoder, key string, valu
 }
 
 // AppendStringer appends a fmt.Stringer-compatible value as a string element.
+//
+// It follows the same nil and panic behavior as AddStringer.
 func AppendStringer(dst *buffer.Buffer, enc encoder.ArrayEncoder, value Stringer) *buffer.Buffer {
 	if IsNil(value) {
 		return enc.AppendString(dst, "")
@@ -50,6 +58,8 @@ func AppendStringer(dst *buffer.Buffer, enc encoder.ArrayEncoder, value Stringer
 
 // AddStringerSafe appends a stringer field and converts panic from String into
 // a diagnostic string.
+//
+// The recovered value is encoded as "PANIC=<value>".
 func AddStringerSafe(dst *buffer.Buffer, enc encoder.ObjectEncoder, key string, value Stringer) (out *buffer.Buffer) {
 	defer func() {
 		if recovered := recover(); recovered != nil {

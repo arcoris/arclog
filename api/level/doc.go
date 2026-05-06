@@ -35,6 +35,10 @@
 // The standard threshold rule is inclusive: a record is enabled when its level
 // is valid and greater than or equal to the configured threshold.
 //
+// The zero value of Level is Info. That makes uninitialized level variables
+// represent ordinary operational records, but callers should still validate
+// external configuration with Parse or IsValid before using it as a threshold.
+//
 // Invalid is a sentinel for failed parsing or out-of-range values. It is not a
 // valid log-entry severity and must not be accepted as a normal threshold.
 package level

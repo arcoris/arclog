@@ -14,30 +14,43 @@
    limitations under the License.
 */
 
-package level_test
+package encoders_test
 
 import (
 	"testing"
 
-	"arcoris.dev/arclog/api/buffer"
-	"arcoris.dev/arclog/api/level"
+	"arcoris.dev/arclog/api/encoder/encoders"
 )
 
-// TestEncoderContract verifies the function shape expected by entry encoders.
-func TestEncoderContract(t *testing.T) {
+func TestIsNil(t *testing.T) {
 	t.Parallel()
 
-	var enc level.Encoder = func(dst *buffer.Buffer, lvl level.Level) *buffer.Buffer {
-		dst.AppendString(lvl.String())
-		return dst
+	var ptr *int
+	var slice []string
+	var fn func()
+
+	tests := []struct {
+		name  string
+		value any
+		want  bool
+	}{
+		{"nil-interface", nil, true},
+		{"nil-pointer", ptr, true},
+		{"nil-slice", slice, true},
+		{"nil-function", fn, true},
+		{"zero-int", 0, false},
+		{"struct", struct{}{}, false},
+		{"non-nil-slice", []string{}, false},
 	}
 
-	dst := buffer.New(0)
-	got := enc(dst, level.Error)
-	if got != dst {
-		t.Fatalf("Encoder returned a different buffer")
-	}
-	if got.String() != "error" {
-		t.Fatalf("encoded level = %q, want %q", got.String(), "error")
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := encoders.IsNil(tt.value); got != tt.want {
+				t.Fatalf("IsNil() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

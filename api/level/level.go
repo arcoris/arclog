@@ -98,7 +98,11 @@ const (
 )
 
 const (
+	// minLevel is the lowest real severity and anchors IsValid.
 	minLevel = Trace
+
+	// maxLevel is the highest real severity and keeps Invalid outside the valid
+	// range even though it is numerically adjacent to Panic.
 	maxLevel = Panic
 )
 

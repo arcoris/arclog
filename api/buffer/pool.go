@@ -42,9 +42,12 @@ import objectpool "arcoris.dev/pool"
 // stricter construction contract of the shared arcoris.dev/pool package for
 // explicitly configured pools.
 type Pool struct {
+	// pool is nil for the safe non-pooling zero value.
 	pool *objectpool.Pool[*Buffer]
 
-	initialCapacity     int
+	// initialCapacity is the capacity used only for newly allocated buffers.
+	initialCapacity int
+	// maxRetainedCapacity is the capacity ceiling checked on the return path.
 	maxRetainedCapacity int
 }
 
@@ -118,6 +121,8 @@ func (p Pool) Put(buf *Buffer) {
 	p.pool.Put(buf)
 }
 
+// normalizeCapacity keeps all public constructors aligned on negative-capacity
+// handling without exporting a policy knob.
 func normalizeCapacity(capacity int) int {
 	if capacity < 0 {
 		return 0
@@ -125,6 +130,8 @@ func normalizeCapacity(capacity int) int {
 	return capacity
 }
 
+// retainedCapacityLimit preserves the package default when an internal Pool
+// value carries an unset or invalid retention limit.
 func retainedCapacityLimit(limit int) int {
 	if limit <= 0 {
 		return MaxRetainedSize

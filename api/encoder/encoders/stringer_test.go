@@ -46,6 +46,17 @@ func TestAddStringerNil(t *testing.T) {
 	}
 }
 
+func TestAppendStringer(t *testing.T) {
+	t.Parallel()
+
+	dst := buffer.New(0)
+	got := encoders.AppendStringer(dst, testEncoder{}, stringer("ok"))
+
+	if got.String() != "ok;" {
+		t.Fatalf("buffer = %q, want %q", got.String(), "ok;")
+	}
+}
+
 func TestAddStringerSafeRecoversPanic(t *testing.T) {
 	t.Parallel()
 
@@ -57,18 +68,22 @@ func TestAddStringerSafeRecoversPanic(t *testing.T) {
 	}
 }
 
+// stringer is a small value implementation used for successful conversion
+// tests.
 type stringer string
 
 func (s stringer) String() string {
 	return string(s)
 }
 
+// nilStringer verifies typed-nil Stringer handling without invoking String.
 type nilStringer struct{}
 
 func (*nilStringer) String() string {
 	return "unreachable"
 }
 
+// panicStringer verifies the safe helper's recovery path.
 type panicStringer struct{}
 
 func (panicStringer) String() string {

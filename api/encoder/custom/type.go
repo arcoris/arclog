@@ -28,13 +28,17 @@ import (
 // is passed as any because the type selection policy belongs to the caller or
 // registry that invoked this encoder.
 //
-// Implementations MUST append to dst and MUST return the buffer that should be
-// used after encoding.
+// Implementations MUST return the buffer that should be used after encoding and
+// MUST NOT release dst. Returned errors propagate to the caller's field
+// dispatch or runtime encoder path.
 type TypeEncoder interface {
+	// EncodeType appends value under key using enc's object-field contract.
 	EncodeType(dst *buffer.Buffer, enc encoder.ObjectEncoder, key string, value any) (*buffer.Buffer, error)
 }
 
 // TypeEncoderFunc adapts a function to TypeEncoder.
+//
+// A nil TypeEncoderFunc is invalid and will panic when EncodeType is called.
 type TypeEncoderFunc func(*buffer.Buffer, encoder.ObjectEncoder, string, any) (*buffer.Buffer, error)
 
 // EncodeType calls f(dst, enc, key, value).

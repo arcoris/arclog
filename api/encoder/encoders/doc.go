@@ -20,4 +20,9 @@
 // The helpers in this package are not complete log encoders. They handle small
 // cross-cutting operations such as nil-safe error and fmt.Stringer conversion.
 // Runtime encoders may use these helpers from field dispatch code.
+//
+// Strict helpers call user-provided Error or String methods directly and allow
+// panics to propagate. Safe helpers recover those panics and encode a diagnostic
+// string in the fixed form "PANIC=<value>". The conversions may allocate
+// depending on user implementations and formatting.
 package encoders

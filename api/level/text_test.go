@@ -14,16 +14,18 @@
    limitations under the License.
 */
 
-package level
+package level_test
 
 import (
 	"encoding"
 	"testing"
+
+	"arcoris.dev/arclog/api/level"
 )
 
 var (
-	_ encoding.TextMarshaler   = Level(0)
-	_ encoding.TextUnmarshaler = (*Level)(nil)
+	_ encoding.TextMarshaler   = level.Level(0)
+	_ encoding.TextUnmarshaler = (*level.Level)(nil)
 )
 
 // TestLevelMarshalText verifies that every valid severity has a stable textual
@@ -31,16 +33,16 @@ var (
 func TestLevelMarshalText(t *testing.T) {
 	t.Parallel()
 
-	valid := []Level{
-		Trace,
-		Debug,
-		Info,
-		Notice,
-		Warn,
-		Error,
-		Critical,
-		Fatal,
-		Panic,
+	valid := []level.Level{
+		level.Trace,
+		level.Debug,
+		level.Info,
+		level.Notice,
+		level.Warn,
+		level.Error,
+		level.Critical,
+		level.Fatal,
+		level.Panic,
 	}
 
 	for _, lvl := range valid {
@@ -64,7 +66,7 @@ func TestLevelMarshalText(t *testing.T) {
 func TestLevelMarshalTextRejectsInvalidValues(t *testing.T) {
 	t.Parallel()
 
-	invalid := []Level{Invalid, Level(42), Level(-100)}
+	invalid := []level.Level{level.Invalid, level.Level(42), level.Level(-100)}
 	for _, lvl := range invalid {
 		lvl := lvl
 		t.Run(lvl.String(), func(t *testing.T) {
@@ -85,16 +87,16 @@ func TestLevelUnmarshalText(t *testing.T) {
 	tests := []struct {
 		name  string
 		input string
-		want  Level
+		want  level.Level
 	}{
-		{"trace", "trace", Trace},
-		{"debug-upper", "DEBUG", Debug},
-		{"info-spaces", " info ", Info},
-		{"warning-alias", "WARNING", Warn},
-		{"err-alias", "err", Error},
-		{"crit-alias", "crit", Critical},
-		{"fatal", "fatal", Fatal},
-		{"panic", "panic", Panic},
+		{"trace", "trace", level.Trace},
+		{"debug-upper", "DEBUG", level.Debug},
+		{"info-spaces", " info ", level.Info},
+		{"warning-alias", "WARNING", level.Warn},
+		{"err-alias", "err", level.Error},
+		{"crit-alias", "crit", level.Critical},
+		{"fatal", "fatal", level.Fatal},
+		{"panic", "panic", level.Panic},
 	}
 
 	for _, tt := range tests {
@@ -102,7 +104,7 @@ func TestLevelUnmarshalText(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			lvl := Trace
+			lvl := level.Trace
 			if err := lvl.UnmarshalText([]byte(tt.input)); err != nil {
 				t.Fatalf("UnmarshalText(%q) returned error: %v", tt.input, err)
 			}
@@ -118,12 +120,12 @@ func TestLevelUnmarshalText(t *testing.T) {
 func TestLevelUnmarshalTextLeavesReceiverUnchangedOnError(t *testing.T) {
 	t.Parallel()
 
-	lvl := Info
+	lvl := level.Info
 	if err := lvl.UnmarshalText([]byte("not-a-level")); err == nil {
 		t.Fatalf("UnmarshalText returned nil error")
 	}
-	if lvl != Info {
-		t.Fatalf("UnmarshalText changed receiver to %v, want %v", lvl, Info)
+	if lvl != level.Info {
+		t.Fatalf("UnmarshalText changed receiver to %v, want %v", lvl, level.Info)
 	}
 }
 
@@ -131,7 +133,7 @@ func TestLevelUnmarshalTextLeavesReceiverUnchangedOnError(t *testing.T) {
 func TestLevelUnmarshalTextRejectsNilReceiver(t *testing.T) {
 	t.Parallel()
 
-	var lvl *Level
+	var lvl *level.Level
 	if err := lvl.UnmarshalText([]byte("info")); err == nil {
 		t.Fatalf("UnmarshalText on nil receiver returned nil error")
 	}

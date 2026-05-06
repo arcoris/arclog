@@ -14,10 +14,12 @@
    limitations under the License.
 */
 
-package level
+package level_test
 
 import (
 	"testing"
+
+	"arcoris.dev/arclog/api/level"
 )
 
 // TestParseValidLevels verifies canonical names, aliases, case-insensitivity,
@@ -28,24 +30,24 @@ func TestParseValidLevels(t *testing.T) {
 	tests := []struct {
 		name  string
 		input string
-		want  Level
+		want  level.Level
 	}{
-		{"trace", "trace", Trace},
-		{"trace-upper", "TRACE", Trace},
-		{"debug", "debug", Debug},
-		{"info", "info", Info},
-		{"information", "Information", Info},
-		{"informational", "informational", Info},
-		{"notice", "notice", Notice},
-		{"warn", "warn", Warn},
-		{"warning", "WARNING", Warn},
-		{"error", "error", Error},
-		{"err", "ERR", Error},
-		{"critical", "critical", Critical},
-		{"crit", "CRIT", Critical},
-		{"fatal", "fatal", Fatal},
-		{"panic", "panic", Panic},
-		{"spaces", "  info  ", Info},
+		{"trace", "trace", level.Trace},
+		{"trace-upper", "TRACE", level.Trace},
+		{"debug", "debug", level.Debug},
+		{"info", "info", level.Info},
+		{"information", "Information", level.Info},
+		{"informational", "informational", level.Info},
+		{"notice", "notice", level.Notice},
+		{"warn", "warn", level.Warn},
+		{"warning", "WARNING", level.Warn},
+		{"error", "error", level.Error},
+		{"err", "ERR", level.Error},
+		{"critical", "critical", level.Critical},
+		{"crit", "CRIT", level.Critical},
+		{"fatal", "fatal", level.Fatal},
+		{"panic", "panic", level.Panic},
+		{"spaces", "  info  ", level.Info},
 	}
 
 	for _, tt := range tests {
@@ -53,7 +55,7 @@ func TestParseValidLevels(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := Parse(tt.input)
+			got, err := level.Parse(tt.input)
 			if err != nil {
 				t.Fatalf("Parse(%q) returned error: %v", tt.input, err)
 			}
@@ -75,11 +77,11 @@ func TestParseInvalidLevels(t *testing.T) {
 		t.Run(input, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := Parse(input)
+			got, err := level.Parse(input)
 			if err == nil {
 				t.Fatalf("Parse(%q) returned nil error", input)
 			}
-			if got != Invalid {
+			if got != level.Invalid {
 				t.Fatalf("Parse(%q) = %v, want Invalid", input, got)
 			}
 		})
@@ -90,8 +92,8 @@ func TestParseInvalidLevels(t *testing.T) {
 func TestMustParseSucceeds(t *testing.T) {
 	t.Parallel()
 
-	if got := MustParse("INFO"); got != Info {
-		t.Fatalf("MustParse(%q) = %v, want %v", "INFO", got, Info)
+	if got := level.MustParse("INFO"); got != level.Info {
+		t.Fatalf("MustParse(%q) = %v, want %v", "INFO", got, level.Info)
 	}
 }
 
@@ -105,5 +107,5 @@ func TestMustParsePanics(t *testing.T) {
 		}
 	}()
 
-	_ = MustParse("not-a-level")
+	_ = level.MustParse("not-a-level")
 }

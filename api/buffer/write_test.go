@@ -22,6 +22,7 @@ import (
 	"arcoris.dev/arclog/api/buffer"
 )
 
+// newBuffer keeps black-box tests focused on zero-value Buffer behavior.
 func newBuffer() *buffer.Buffer {
 	return &buffer.Buffer{}
 }
