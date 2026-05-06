@@ -36,8 +36,6 @@ type Buffer struct {
 	pool Pool
 }
 
-var _ Interface = (*Buffer)(nil)
-
 // New creates a standalone Buffer with the provided initial capacity.
 //
 // If capacity is negative, it is treated as 0. The returned buffer is not

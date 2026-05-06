@@ -36,6 +36,10 @@ import objectpool "arcoris.dev/pool"
 // and Put calls. Individual Buffer values remain single-owner mutable objects:
 // callers MUST NOT use a buffer after Put or Free returns.
 //
+// Pool is a small copyable handle. Copying a Pool value copies configuration
+// fields and the pointer to the shared arcoris.dev/pool backend; it does not
+// duplicate the underlying reusable-object storage.
+//
 // The zero value of Pool is intentionally safe but non-pooling. A zero-value
 // Pool.Get returns a standalone buffer and Pool.Put discards it. This wrapper
 // policy keeps accidental zero-value use from panicking while preserving the

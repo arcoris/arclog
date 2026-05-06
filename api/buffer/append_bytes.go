@@ -26,8 +26,9 @@ func (b *Buffer) AppendByte(v byte) {
 
 // AppendBytes appends v exactly as provided.
 //
-// No escaping, validation, or interpretation is performed. Callers MUST only
-// pass bytes that are already valid for the target encoding.
+// The bytes from v are copied into the buffer's storage by append. No escaping,
+// validation, or interpretation is performed. Callers MUST only pass bytes that
+// are already valid for the target encoding.
 func (b *Buffer) AppendBytes(v []byte) {
 	b.data = append(b.data, v...)
 }

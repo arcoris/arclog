@@ -27,8 +27,9 @@ const (
 	// MaxRetainedSize is the largest buffer capacity, in bytes, that the default
 	// Pool retains after Put or Free.
 	//
-	// Buffers larger than this value are discarded instead of being returned to
-	// sync.Pool. This prevents a single unusually large log record from pinning
-	// a large backing array for the lifetime of a long-running process.
+	// Buffers larger than this value are discarded instead of being retained by
+	// the arcoris.dev/pool-backed pool. This prevents a single unusually large
+	// log record from pinning a large backing array for the lifetime of a
+	// long-running process.
 	MaxRetainedSize = 64 * 1024
 )
