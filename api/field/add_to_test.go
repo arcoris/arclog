@@ -30,6 +30,14 @@ type testStringer string
 
 func (s testStringer) String() string { return string(s) }
 
+type panicStringer struct{}
+
+func (panicStringer) String() string { panic("stringer panic") }
+
+type panicError struct{}
+
+func (panicError) Error() string { panic("error panic") }
+
 func TestAddToPrimitive(t *testing.T) {
 	t.Parallel()
 
@@ -211,4 +219,32 @@ func TestAddToUnsupportedType(t *testing.T) {
 	if !errors.Is(err, field.ErrUnsupportedType) {
 		t.Fatalf("err=%v", err)
 	}
+}
+
+func TestAddToStringerPropagatesPanic(t *testing.T) {
+	t.Parallel()
+
+	requirePanic(t, func() {
+		_, _ = field.Stringer("stringer", panicStringer{}).AddTo(buffer.New(0), recordingEncoder{})
+	})
+}
+
+func TestAddToErrorPropagatesPanic(t *testing.T) {
+	t.Parallel()
+
+	requirePanic(t, func() {
+		_, _ = field.Error("error", panicError{}).AddTo(buffer.New(0), recordingEncoder{})
+	})
+}
+
+func requirePanic(t *testing.T, fn func()) {
+	t.Helper()
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("function did not panic")
+		}
+	}()
+
+	fn()
 }

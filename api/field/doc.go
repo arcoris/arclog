@@ -50,6 +50,13 @@
 // convenience constructor; callers on hot paths should prefer typed
 // constructors.
 //
+// Constructors treat nil and typed-nil marshalers, errors, and fmt.Stringer
+// values as explicit nil or skip fields according to the constructor contract.
+// Non-nil error and fmt.Stringer values are converted during AddTo through the
+// encoder/convert package. That conversion is strict: Error and String panics
+// propagate to the caller because panic recovery and diagnostic formatting are
+// runtime policy, not part of the field contract.
+//
 // # Ownership
 //
 // Constructors do not copy byte slices or user-provided objects. If a caller

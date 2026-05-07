@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"arcoris.dev/arclog/api/encoder"
-	encoderconv "arcoris.dev/arclog/api/encoder/encoders"
+	"arcoris.dev/arclog/api/internal/nilx"
 )
 
 const (
@@ -172,7 +172,7 @@ func Uintptr(key string, value uintptr) Field {
 // A nil or typed-nil marshaler is represented as Nil(key). Non-nil marshalers
 // are retained by reference and are invoked later by AddTo.
 func Object(key string, value encoder.ObjectMarshaler) Field {
-	if encoderconv.IsNil(value) {
+	if nilx.IsNil(value) {
 		return Nil(key)
 	}
 	return Field{Key: key, Type: ObjectMarshalerType, Interface: value}
@@ -183,7 +183,7 @@ func Object(key string, value encoder.ObjectMarshaler) Field {
 // A nil or typed-nil marshaler is represented as Nil(key). Non-nil marshalers
 // are retained by reference and are invoked later by AddTo.
 func Array(key string, value encoder.ArrayMarshaler) Field {
-	if encoderconv.IsNil(value) {
+	if nilx.IsNil(value) {
 		return Nil(key)
 	}
 	return Field{Key: key, Type: ArrayMarshalerType, Interface: value}
@@ -195,7 +195,7 @@ func Array(key string, value encoder.ArrayMarshaler) Field {
 // A nil or typed-nil marshaler becomes Skip because there is no key at which to
 // encode an explicit nil value.
 func Inline(value encoder.ObjectMarshaler) Field {
-	if encoderconv.IsNil(value) {
+	if nilx.IsNil(value) {
 		return Skip()
 	}
 	return Field{Type: InlineMarshalerType, Interface: value}
@@ -220,7 +220,7 @@ func Namespace(key string) Field { return Field{Key: key, Type: NamespaceType} }
 // A nil or typed-nil Stringer is represented as Nil(key). String conversion is
 // deferred until AddTo and may allocate or panic according to the String method.
 func Stringer(key string, value fmt.Stringer) Field {
-	if encoderconv.IsNil(value) {
+	if nilx.IsNil(value) {
 		return Nil(key)
 	}
 	return Field{Key: key, Type: StringerType, Interface: value}
@@ -229,9 +229,10 @@ func Stringer(key string, value fmt.Stringer) Field {
 // Error constructs a field backed by an error.
 //
 // A nil or typed-nil error is represented as Nil(key). Error string conversion
-// is deferred until AddTo and may allocate according to the error value.
+// is deferred until AddTo and may allocate or panic according to the error
+// value.
 func Error(key string, value error) Field {
-	if encoderconv.IsNil(value) {
+	if nilx.IsNil(value) {
 		return Nil(key)
 	}
 	return Field{Key: key, Type: ErrorType, Interface: value}

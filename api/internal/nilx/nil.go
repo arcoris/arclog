@@ -14,18 +14,14 @@
    limitations under the License.
 */
 
-package encoders
+package nilx
 
 import "reflect"
 
-// IsNil reports whether value is nil or holds a typed nil value.
+// IsNil reports whether value is nil or contains a typed nil value.
 //
-// The helper exists because interface values can contain typed nil pointers,
-// maps, slices, functions, channels, or interfaces. Direct comparison with nil
-// only catches an untyped nil interface.
-//
-// Non-nil scalar values, structs, and arrays always report false. IsNil does
-// not call methods on value.
+// IsNil does not call methods on value. Non-nil scalar values, structs, and
+// arrays always report false because they cannot be nil.
 func IsNil(value any) bool {
 	if value == nil {
 		return true
@@ -33,7 +29,12 @@ func IsNil(value any) bool {
 
 	rv := reflect.ValueOf(value)
 	switch rv.Kind() {
-	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+	case reflect.Chan,
+		reflect.Func,
+		reflect.Interface,
+		reflect.Map,
+		reflect.Pointer,
+		reflect.Slice:
 		return rv.IsNil()
 	default:
 		return false

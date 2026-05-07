@@ -82,7 +82,7 @@ func TestForbiddenImportReasonDocumentsPackageRules(t *testing.T) {
 		},
 		{
 			name:       "encoder cannot import field even from tests",
-			pkgPath:    "encoder/encoders",
+			pkgPath:    "encoder/convert",
 			testFile:   true,
 			importPath: apiImport + "field",
 			wantReason: "encoder packages",
@@ -132,9 +132,31 @@ func TestForbiddenImportReasonDocumentsPackageRules(t *testing.T) {
 			wantReason: "clock is a timestamp-source",
 		},
 		{
-			name:       "field may import encoder subpackages",
+			name:       "field may import encoder convert",
 			pkgPath:    "field",
-			importPath: apiImport + "encoder/encoders",
+			importPath: apiImport + "encoder/convert",
+		},
+		{
+			name:       "field may import api internal nilx",
+			pkgPath:    "field",
+			importPath: apiImport + "internal/nilx",
+		},
+		{
+			name:       "encoder convert may import api internal nilx",
+			pkgPath:    "encoder/convert",
+			importPath: apiImport + "internal/nilx",
+		},
+		{
+			name:       "encoder convert cannot import entry keys",
+			pkgPath:    "encoder/convert",
+			importPath: apiImport + "entrykey",
+			wantReason: "encoder/convert may depend",
+		},
+		{
+			name:       "nilx is stdlib only",
+			pkgPath:    "internal/nilx",
+			importPath: apiImport + "buffer",
+			wantReason: "nilx must remain",
 		},
 		{
 			name:       "buffer cannot import domain packages",
@@ -268,13 +290,20 @@ func forbiddenImportReason(pkgPath string, testFile bool, importPath string) str
 		if isAPIImportPath(importPath) {
 			return "entrykey is a key vocabulary package and must not depend on other api packages"
 		}
+	case pkgPath == "encoder/convert":
+		if !isAllowedAPIImport(importPath, "buffer", "internal/nilx") &&
+			importPath != apiImport+"encoder" {
+			return "encoder/convert may depend only on buffer, encoder contracts, and api-internal nil inspection"
+		}
 	case isPackageOrSubpackage(pkgPath, "encoder"):
 		if !isAllowedAPIImport(importPath, "buffer", "encoder") {
 			return "encoder packages may depend only on buffer and sibling encoder contracts"
 		}
 	case pkgPath == "field":
-		if !isAllowedAPIImport(importPath, "buffer", "encoder") {
-			return "field may depend only on encoder and buffer"
+		if !isAllowedAPIImport(importPath, "buffer", "internal/nilx") &&
+			importPath != apiImport+"encoder" &&
+			importPath != apiImport+"encoder/convert" {
+			return "field may depend only on encoder, buffer, and api-internal nil inspection"
 		}
 	case pkgPath == "hook":
 		if !isAllowedAPIImport(importPath, "core", "field") {
@@ -295,6 +324,10 @@ func forbiddenImportReason(pkgPath string, testFile bool, importPath string) str
 	case pkgPath == "writer":
 		if isAPIImportPath(importPath) {
 			return "writer is a sink-contract package and must not depend on other api packages"
+		}
+	case pkgPath == "internal/nilx":
+		if isAPIImportPath(importPath) {
+			return "nilx must remain stdlib-only typed-nil inspection"
 		}
 	}
 

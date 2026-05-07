@@ -24,7 +24,7 @@ import (
 
 	"arcoris.dev/arclog/api/buffer"
 	"arcoris.dev/arclog/api/encoder"
-	encoderconv "arcoris.dev/arclog/api/encoder/encoders"
+	encoderconvert "arcoris.dev/arclog/api/encoder/convert"
 )
 
 var (
@@ -53,8 +53,10 @@ var (
 //
 // Skip fields are ignored. Inline fields call the stored object marshaler in the
 // current encoder namespace. Namespace fields delegate to ObjectEncoder.
-// OpenNamespace. Object, array, reflection, stringer, and error fields preserve
-// the error semantics of the encoder or conversion helper they call.
+// OpenNamespace. Object, array, and reflection fields preserve the error
+// semantics of the encoder method they call. Error and fmt.Stringer fields use
+// strict encoder-bound conversion: nil-like values have already been normalized
+// by constructors, and panics from Error or String propagate unchanged.
 //
 // AddTo expects fields to be built by this package's constructors. Manually
 // assembled fields with mismatched Type and payload storage may panic through a
@@ -123,9 +125,9 @@ func (f Field) AddTo(dst *buffer.Buffer, enc encoder.ObjectEncoder) (*buffer.Buf
 	case NamespaceType:
 		return enc.OpenNamespace(dst, f.Key), nil
 	case StringerType:
-		return encoderconv.AddStringer(dst, enc, f.Key, f.Interface.(encoderconv.Stringer)), nil
+		return encoderconvert.AddStringer(dst, enc, f.Key, f.Interface.(fmt.Stringer)), nil
 	case ErrorType:
-		return encoderconv.AddError(dst, enc, f.Key, f.Interface.(error)), nil
+		return encoderconvert.AddError(dst, enc, f.Key, f.Interface.(error)), nil
 	default:
 		return dst, fmt.Errorf("%w: %s", ErrUnsupportedType, f.Type)
 	}

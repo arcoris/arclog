@@ -26,10 +26,12 @@
 //
 // The root arcoris.dev/arclog package is expected to be the user-facing facade.
 // API packages must stay dependency-light and must not import the root package,
-// runtime packages, or internal implementation packages. Dependency direction is
-// part of the public design: field dispatch may depend on encoder contracts,
-// encoder contracts may depend on buffer, and encoder deliberately does not
-// import field. The intended direction is:
+// runtime packages, or root-level internal implementation packages. Small
+// api/internal packages may exist for shared API implementation details, but
+// they are not extension contracts and should remain package-specific in scope.
+// Dependency direction is part of the public design: field dispatch may depend
+// on encoder contracts, encoder contracts may depend on buffer, and encoder
+// deliberately does not import field. The intended direction is:
 //
 //	field -> encoder -> buffer
 //
