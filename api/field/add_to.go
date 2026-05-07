@@ -27,20 +27,22 @@ import (
 	encoderconv "arcoris.dev/arclog/api/encoder/encoders"
 )
 
-// ErrUnsupportedType is returned when AddTo receives a Field with a Type value
-// that is not defined by this package.
-//
-// The error is intended for fields assembled manually or by incompatible
-// extension code. Fields produced by this package's constructors always use a
-// supported type tag.
-var ErrUnsupportedType = errors.New("field: unsupported field type")
+var (
+	// ErrUnsupportedType is returned when AddTo receives a Field with a Type
+	// value that is not defined by this package.
+	//
+	// The error is intended for fields assembled manually or by incompatible
+	// extension code. Fields produced by this package's constructors always use
+	// a supported type tag.
+	ErrUnsupportedType = errors.New("field: unsupported field type")
 
-// ErrNilEncoder is returned when AddTo needs to emit a field but no
-// encoder.ObjectEncoder was provided.
-//
-// Skip fields do not require an encoder and remain a no-op even when enc is
-// nil.
-var ErrNilEncoder = errors.New("field: nil object encoder")
+	// ErrNilEncoder is returned when AddTo needs to emit a field but no
+	// encoder.ObjectEncoder was provided.
+	//
+	// Skip fields do not require an encoder and remain a no-op even when enc is
+	// nil.
+	ErrNilEncoder = errors.New("field: nil object encoder")
+)
 
 // AddTo appends f to enc and returns the authoritative buffer for subsequent
 // writes.
