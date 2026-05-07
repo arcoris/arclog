@@ -17,24 +17,31 @@
 package hook_test
 
 import (
-	"errors"
 	"testing"
 
 	"arcoris.dev/arclog/api/hook"
 )
 
-func TestWriteResult(t *testing.T) {
+type namedHook struct {
+	name string
+}
+
+var _ hook.Named = namedHook{}
+
+func (h namedHook) Name() string {
+	return h.name
+}
+
+func TestNamedContract(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name       string
-		result     hook.WriteResult
-		wantFailed bool
-		wantErr    error
+		name string
+		hook hook.Named
+		want string
 	}{
-		{name: "zero value", result: hook.WriteResult{}, wantFailed: false},
-		{name: "success result", result: hook.Success(), wantFailed: false},
-		{name: "failure with nil error", result: hook.Failure(nil), wantFailed: false},
+		{name: "non-empty", hook: namedHook{name: "audit"}, want: "audit"},
+		{name: "empty allowed", hook: namedHook{}, want: ""},
 	}
 
 	for _, tt := range tests {
@@ -42,21 +49,9 @@ func TestWriteResult(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			if got := tt.result.Failed(); got != tt.wantFailed {
-				t.Fatalf("Failed() = %v, want %v", got, tt.wantFailed)
-			}
-			if !errors.Is(tt.result.Err, tt.wantErr) {
-				t.Fatalf("Err = %v, want %v", tt.result.Err, tt.wantErr)
+			if got := tt.hook.Name(); got != tt.want {
+				t.Fatalf("Name() = %q, want %q", got, tt.want)
 			}
 		})
-	}
-
-	wantErr := errors.New("write failed")
-	result := hook.Failure(wantErr)
-	if !result.Failed() {
-		t.Fatal("Failure(err).Failed() = false")
-	}
-	if !errors.Is(result.Err, wantErr) {
-		t.Fatalf("Err = %v, want %v", result.Err, wantErr)
 	}
 }

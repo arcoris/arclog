@@ -19,7 +19,8 @@ package hook
 // Priority controls ordering among hooks registered for the same phase.
 //
 // Lower values run earlier. Runtime managers may use Priority when ordering
-// registered hooks, but this package does not provide a manager implementation.
+// registered hooks, but this package does not provide a manager implementation,
+// tie-breaking policy, or cross-phase ordering rule.
 type Priority int
 
 const (
@@ -43,7 +44,7 @@ const (
 	PriorityLast Priority = 1000
 )
 
-// Before reports whether p sorts before other.
+// Before reports whether p sorts before other in ascending priority order.
 func (p Priority) Before(other Priority) bool {
 	return p < other
 }

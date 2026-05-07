@@ -23,44 +23,20 @@ import (
 	"arcoris.dev/arclog/api/field"
 )
 
-// PreWriteFunc adapts a function to PreWriteHook.
-//
-// A nil PreWriteFunc is a no-op hook that returns entry and fields unchanged.
-type PreWriteFunc func(context.Context, core.Entry, []field.Field) (core.Entry, []field.Field, error)
-
-// PreWrite calls f.
-func (f PreWriteFunc) PreWrite(ctx context.Context, entry core.Entry, fields []field.Field) (core.Entry, []field.Field, error) {
-	if f == nil {
-		return entry, fields, nil
-	}
-
-	return f(ctx, entry, fields)
-}
-
 // PostWriteFunc adapts a function to PostWriteHook.
 //
-// A nil PostWriteFunc is a no-op hook.
+// The adapter passes through the borrowed entry, borrowed field slice, and
+// WriteResult without modification. It does not recover panics, copy values, add
+// synchronization, or reinterpret write errors.
+//
+// A nil PostWriteFunc is a no-op observer and returns nil.
 type PostWriteFunc func(context.Context, core.Entry, []field.Field, WriteResult) error
 
-// PostWrite calls f.
+// PostWrite calls f or returns nil when f is nil.
 func (f PostWriteFunc) PostWrite(ctx context.Context, entry core.Entry, fields []field.Field, result WriteResult) error {
 	if f == nil {
 		return nil
 	}
 
 	return f(ctx, entry, fields, result)
-}
-
-// ErrorFunc adapts a function to ErrorHook.
-//
-// A nil ErrorFunc is a no-op hook.
-type ErrorFunc func(context.Context, core.Entry, []field.Field, error)
-
-// OnError calls f.
-func (f ErrorFunc) OnError(ctx context.Context, entry core.Entry, fields []field.Field, err error) {
-	if f == nil {
-		return
-	}
-
-	f(ctx, entry, fields, err)
 }

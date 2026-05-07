@@ -20,7 +20,8 @@ package hook
 //
 // Registration removes a specific registration, not necessarily every
 // registration of the same hook value. This avoids requiring every hook to have
-// a globally unique name.
+// a globally unique name. Implementations should make Remove safe to call more
+// than once; the first successful call returns true and later calls return false.
 type Registration interface {
 	// Remove unregisters the associated hook.
 	//
@@ -32,10 +33,11 @@ type Registration interface {
 // RegistrationFunc adapts a function to Registration.
 //
 // A nil RegistrationFunc is a no-op registration whose Remove method returns
-// false.
+// false. A non-nil RegistrationFunc owns any synchronization or idempotence
+// policy needed by the underlying registration.
 type RegistrationFunc func() bool
 
-// Remove calls f.
+// Remove calls f and returns its result, or false when f is nil.
 func (f RegistrationFunc) Remove() bool {
 	if f == nil {
 		return false

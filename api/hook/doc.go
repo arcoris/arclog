@@ -24,10 +24,10 @@
 //
 // # Responsibility boundary
 //
-// This package defines contracts and small adapters only. It does not store
-// hooks, sort hooks, start goroutines, recover panics, retry writes, batch
-// events, own shutdown workers, or implement a global registry. Runtime
-// packages own those concerns.
+// This package defines contracts, value types, and function adapters only. It
+// does not store hooks, sort hooks, start goroutines, recover panics, retry
+// writes, batch events, own shutdown workers, or implement a global registry.
+// Concrete hook managers and runtime policy live outside api.
 //
 // Hooks do not encode entries and do not write to byte sinks directly. Encoding
 // belongs to encoder implementations. Byte I/O belongs to core and writer
@@ -46,16 +46,24 @@
 // not return another error, avoiding recursive error handling in the API
 // contract.
 //
+// Manager is an optional orchestration contract for runtime components that want
+// to expose hook registration and phase dispatch through API types. It is not a
+// manager implementation and does not define storage, ordering data structures,
+// background workers, panic policy, or shutdown behavior.
+//
 // # Ownership
 //
 // Entry values are borrowed from the caller. Field slices are borrowed for the
 // duration of the hook call. Hook implementations must not retain entries or
 // field slices beyond the call unless they clone the entry and copy the field
-// slice first. Field payload ownership remains governed by the field package.
+// slice first. Field payload ownership remains governed by the field package; a
+// copied field slice can still contain caller-owned payload values such as byte
+// slices, errors, stringers, or marshalers.
 //
 // # Concurrency
 //
 // Hooks are commonly shared by loggers, cores, and runtime managers. Hook
 // implementations should be safe for concurrent use unless they explicitly
-// document a narrower contract.
+// document a narrower contract. The function adapters in this package add no
+// synchronization around wrapped functions.
 package hook

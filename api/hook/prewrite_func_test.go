@@ -26,7 +26,9 @@ import (
 	"arcoris.dev/arclog/api/hook"
 )
 
-func TestPreWriteFunc(t *testing.T) {
+var _ hook.PreWriteHook = hook.PreWriteFunc(nil)
+
+func TestPreWriteFuncPassesValuesAndReturnsFunctionResult(t *testing.T) {
 	t.Parallel()
 
 	wantErr := errors.New("veto")
@@ -34,6 +36,9 @@ func TestPreWriteFunc(t *testing.T) {
 	inFields := []field.Field{field.String("a", "b")}
 
 	pre := hook.PreWriteFunc(func(ctx context.Context, entry core.Entry, fields []field.Field) (core.Entry, []field.Field, error) {
+		if ctx == nil {
+			t.Fatal("context is nil")
+		}
 		entry.Message = "after"
 		fields = append(fields, field.String("c", "d"))
 		return entry, fields, wantErr
@@ -49,9 +54,12 @@ func TestPreWriteFunc(t *testing.T) {
 	if len(gotFields) != 2 {
 		t.Fatalf("len(fields) = %d, want 2", len(gotFields))
 	}
+	if len(inFields) != 1 {
+		t.Fatalf("input len(fields) = %d, want 1", len(inFields))
+	}
 }
 
-func TestNilPreWriteFunc(t *testing.T) {
+func TestNilPreWriteFuncReturnsInputsUnchanged(t *testing.T) {
 	t.Parallel()
 
 	entry := core.Entry{Message: "entry"}
@@ -73,60 +81,15 @@ func TestNilPreWriteFunc(t *testing.T) {
 	}
 }
 
-func TestPostWriteFunc(t *testing.T) {
-	t.Parallel()
-
-	wantErr := errors.New("observer failed")
-	called := false
-
-	post := hook.PostWriteFunc(func(ctx context.Context, entry core.Entry, fields []field.Field, result hook.WriteResult) error {
-		called = true
-		if !result.Failed() {
-			t.Fatal("result should be failed")
-		}
-		return wantErr
+func TestPreWriteFuncDoesNotAllocate(t *testing.T) {
+	pre := hook.PreWriteFunc(func(context.Context, core.Entry, []field.Field) (core.Entry, []field.Field, error) {
+		return core.Entry{}, nil, nil
 	})
 
-	err := post.PostWrite(context.Background(), core.Entry{}, nil, hook.Failure(errors.New("write failed")))
-	if !errors.Is(err, wantErr) {
-		t.Fatalf("PostWrite() error = %v, want %v", err, wantErr)
-	}
-	if !called {
-		t.Fatal("underlying function was not called")
-	}
-}
-
-func TestNilPostWriteFunc(t *testing.T) {
-	t.Parallel()
-
-	var post hook.PostWriteFunc
-	if err := post.PostWrite(context.Background(), core.Entry{}, nil, hook.Success()); err != nil {
-		t.Fatalf("PostWrite() error = %v", err)
-	}
-}
-
-func TestErrorFunc(t *testing.T) {
-	t.Parallel()
-
-	wantErr := errors.New("write failed")
-	called := false
-
-	errorHook := hook.ErrorFunc(func(ctx context.Context, entry core.Entry, fields []field.Field, err error) {
-		called = true
-		if !errors.Is(err, wantErr) {
-			t.Fatalf("err = %v, want %v", err, wantErr)
-		}
+	allocs := testing.AllocsPerRun(1000, func() {
+		_, _, _ = pre.PreWrite(context.Background(), core.Entry{}, nil)
 	})
-
-	errorHook.OnError(context.Background(), core.Entry{}, nil, wantErr)
-	if !called {
-		t.Fatal("underlying function was not called")
+	if allocs != 0 {
+		t.Fatalf("allocs per PreWrite() = %g, want 0", allocs)
 	}
-}
-
-func TestNilErrorFunc(t *testing.T) {
-	t.Parallel()
-
-	var errorHook hook.ErrorFunc
-	errorHook.OnError(context.Background(), core.Entry{}, nil, errors.New("ignored"))
 }

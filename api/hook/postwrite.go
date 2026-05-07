@@ -23,37 +23,22 @@ import (
 	"arcoris.dev/arclog/api/field"
 )
 
-// WriteResult describes the result observed by PostWriteHook.
-//
-// The API-level result intentionally contains only the write error. Concrete
-// runtime implementations may track byte counts, sink names, retries, or other
-// diagnostics internally, but core.Core.Write itself only returns error.
-type WriteResult struct {
-	// Err is the error returned by the write attempt.
-	Err error
-}
-
-// Success returns a successful write result.
-func Success() WriteResult {
-	return WriteResult{}
-}
-
-// Failure returns a failed write result.
-func Failure(err error) WriteResult {
-	return WriteResult{Err: err}
-}
-
-// Failed reports whether r represents a failed write attempt.
-func (r WriteResult) Failed() bool {
-	return r.Err != nil
-}
-
 // PostWriteHook observes a log entry after a write attempt.
 //
-// PostWrite may report an observer error to the runtime manager. It cannot
-// change the already-attempted write and should treat entry and fields as
-// read-only borrowed values.
+// PostWrite runs after a core write attempt has completed. It may observe
+// success or failure and may return an observer error to the runtime manager,
+// but it cannot change bytes that were already written or retry the write
+// through this API contract.
+//
+// Entry and fields are borrowed for the duration of the call. Implementations
+// that retain either value must clone Entry when stack ownership is uncertain
+// and must copy the field slice.
 type PostWriteHook interface {
-	// PostWrite observes entry, fields, and the write result.
+	// PostWrite observes entry, fields, and result.
+	//
+	// The context is supplied by the runtime pipeline. PostWriteHook
+	// implementations should respect cancellation for expensive observer work,
+	// but this package does not enforce cancellation, deadlines, retry behavior,
+	// or error aggregation.
 	PostWrite(ctx context.Context, entry core.Entry, fields []field.Field, result WriteResult) error
 }

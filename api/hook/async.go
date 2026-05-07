@@ -16,6 +16,8 @@
 
 package hook
 
+import "reflect"
+
 // AsyncHook marks a hook that may be executed asynchronously by a runtime
 // manager.
 //
@@ -23,9 +25,10 @@ package hook
 // goroutines, allocate queues, copy entries, or provide delivery guarantees.
 // Runtime managers decide whether to honor this preference.
 //
-// Hooks that may run asynchronously must assume that the caller's entry and
+// Hooks that may run asynchronously must assume that the caller-owned entry and
 // field slice stop being valid after the dispatch call unless the runtime
-// manager explicitly documents that it cloned them.
+// manager explicitly documents that it cloned them. Implementations should treat
+// Async as a stable capability declaration, not as per-entry dynamic policy.
 type AsyncHook interface {
 	// Async reports whether the hook may be executed asynchronously.
 	Async() bool
@@ -33,8 +36,33 @@ type AsyncHook interface {
 
 // AllowsAsync reports whether hook declares asynchronous execution support.
 //
-// Hooks that do not implement AsyncHook are treated as synchronous-only.
-func AllowsAsync(hook any) bool {
-	async, ok := hook.(AsyncHook)
+// Nil values, typed nil values, and hooks that do not implement AsyncHook are
+// treated as synchronous-only. AllowsAsync does not recover panics from Async;
+// the Async method is part of the hook's own contract.
+func AllowsAsync(h any) bool {
+	if isNilHook(h) {
+		return false
+	}
+
+	async, ok := h.(AsyncHook)
 	return ok && async.Async()
+}
+
+func isNilHook(h any) bool {
+	if h == nil {
+		return true
+	}
+
+	value := reflect.ValueOf(h)
+	switch value.Kind() {
+	case reflect.Chan,
+		reflect.Func,
+		reflect.Interface,
+		reflect.Map,
+		reflect.Pointer,
+		reflect.Slice:
+		return value.IsNil()
+	default:
+		return false
+	}
 }

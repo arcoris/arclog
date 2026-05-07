@@ -25,10 +25,10 @@ import (
 func TestRegistrationFunc(t *testing.T) {
 	t.Parallel()
 
-	called := false
+	calls := 0
 	registration := hook.RegistrationFunc(func() bool {
-		called = true
-		return true
+		calls++
+		return calls == 1
 	})
 
 	var _ hook.Registration = registration
@@ -36,6 +36,49 @@ func TestRegistrationFunc(t *testing.T) {
 	if !registration.Remove() {
 		t.Fatal("Remove() = false, want true")
 	}
+	if registration.Remove() {
+		t.Fatal("second Remove() = true, want false")
+	}
+	if calls != 2 {
+		t.Fatalf("calls = %d, want 2", calls)
+	}
+}
+
+func TestRegistrationFuncReturnsUnderlyingResult(t *testing.T) {
+	t.Parallel()
+
+	registration := hook.RegistrationFunc(func() bool {
+		return false
+	})
+
+	if registration.Remove() {
+		t.Fatal("Remove() = true, want false")
+	}
+}
+
+func TestRegistrationFuncDoesNotAllocate(t *testing.T) {
+	registration := hook.RegistrationFunc(func() bool {
+		return true
+	})
+
+	allocs := testing.AllocsPerRun(1000, func() {
+		_ = registration.Remove()
+	})
+	if allocs != 0 {
+		t.Fatalf("allocs per Remove() = %g, want 0", allocs)
+	}
+}
+
+func TestRegistrationFuncCallsUnderlyingFunction(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	registration := hook.RegistrationFunc(func() bool {
+		called = true
+		return true
+	})
+
+	_ = registration.Remove()
 	if !called {
 		t.Fatal("underlying function was not called")
 	}

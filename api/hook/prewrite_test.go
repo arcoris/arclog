@@ -18,28 +18,35 @@ package hook_test
 
 import (
 	"context"
+	"testing"
 
 	"arcoris.dev/arclog/api/core"
 	"arcoris.dev/arclog/api/field"
 	"arcoris.dev/arclog/api/hook"
 )
 
-var (
-	_ hook.PreWriteHook  = hook.PreWriteFunc(nil)
-	_ hook.PostWriteHook = hook.PostWriteFunc(nil)
-	_ hook.ErrorHook     = hook.ErrorFunc(nil)
-)
+type preWriteHookContract struct{}
 
-type namedHook struct{}
+var _ hook.PreWriteHook = preWriteHookContract{}
 
-func (namedHook) Name() string { return "named" }
-
-var _ hook.Named = namedHook{}
-
-type preWriteValueHook struct{}
-
-func (preWriteValueHook) PreWrite(context.Context, core.Entry, []field.Field) (core.Entry, []field.Field, error) {
+func (preWriteHookContract) PreWrite(context.Context, core.Entry, []field.Field) (core.Entry, []field.Field, error) {
 	return core.Entry{}, nil, nil
 }
 
-var _ hook.PreWriteHook = preWriteValueHook{}
+func TestPreWriteHookContract(t *testing.T) {
+	t.Parallel()
+
+	entry := core.Entry{Message: "before"}
+	fields := []field.Field{field.String("k", "v")}
+
+	gotEntry, gotFields, err := (preWriteHookContract{}).PreWrite(context.Background(), entry, fields)
+	if err != nil {
+		t.Fatalf("PreWrite() error = %v", err)
+	}
+	if !gotEntry.IsZero() {
+		t.Fatalf("entry = %#v, want zero entry from contract test hook", gotEntry)
+	}
+	if gotFields != nil {
+		t.Fatalf("fields = %#v, want nil", gotFields)
+	}
+}

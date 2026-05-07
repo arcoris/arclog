@@ -21,8 +21,8 @@
 // plugins can share. The API layer is the vocabulary for extension points, not
 // the place where runtime behavior is implemented. Concrete logger facades,
 // concrete core implementations, sinks, JSON or console encoders, caller
-// capture, predicate policy wiring, hook managers, writer adapters, and clock
-// selection belong outside api.
+// capture, predicate policy wiring, concrete hook manager implementations,
+// writer adapters, and clock selection belong outside api.
 //
 // The root arcoris.dev/arclog package is expected to be the user-facing facade.
 // API packages must stay dependency-light and must not import the root package,

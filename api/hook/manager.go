@@ -25,26 +25,51 @@ import (
 
 // Manager is the API-side contract for registering and firing hooks.
 //
-// Manager is an interface only. This package does not define storage,
-// synchronization, ordering implementation, asynchronous delivery, panic
-// recovery, retry behavior, or shutdown workers.
+// Manager is an interface only. It defines the shape that runtime hook
+// orchestrators may expose to logger, core, or integration code. This package
+// does not define storage, synchronization, priority sorting, asynchronous
+// delivery, panic recovery, retry behavior, batching, or shutdown workers.
+//
+// Implementations should be safe for concurrent use unless they document a
+// narrower contract. Registered hooks receive borrowed Entry and field slices
+// according to the phase-specific contracts.
 type Manager interface {
 	// AddPreWrite registers a pre-write hook.
+	//
+	// The returned Registration removes this specific registration. Passing nil
+	// is implementation-defined; runtimes may reject it, ignore it, or register a
+	// no-op.
 	AddPreWrite(PreWriteHook, Priority) Registration
 
 	// AddPostWrite registers a post-write hook.
+	//
+	// The returned Registration removes this specific registration. Priority is a
+	// relative ordering hint for hooks in the post-write phase.
 	AddPostWrite(PostWriteHook, Priority) Registration
 
 	// AddError registers a write-error hook.
+	//
+	// The returned Registration removes this specific registration. Error hooks
+	// observe failures; they do not replace the original write error.
 	AddError(ErrorHook, Priority) Registration
 
 	// FirePreWrite runs the pre-write phase.
+	//
+	// Implementations should return the authoritative entry and field slice that
+	// later phases must continue with. A non-nil error represents the runtime's
+	// chosen pre-write veto or transformation failure.
 	FirePreWrite(context.Context, core.Entry, []field.Field) (core.Entry, []field.Field, error)
 
 	// FirePostWrite runs the post-write phase.
+	//
+	// Implementations should return an observer error only for hook execution
+	// failure. The WriteResult argument remains the write outcome being observed.
 	FirePostWrite(context.Context, core.Entry, []field.Field, WriteResult) error
 
 	// FireError runs the write-error phase.
+	//
+	// FireError intentionally has no return value to avoid recursive error
+	// handling in the public contract.
 	FireError(context.Context, core.Entry, []field.Field, error)
 
 	// Stop releases manager resources.

@@ -35,6 +35,7 @@ func TestPriorityBefore(t *testing.T) {
 		{name: "default before high", left: hook.PriorityDefault, right: hook.PriorityHigh, want: false},
 		{name: "same priority", left: hook.PriorityDefault, right: hook.PriorityDefault, want: false},
 		{name: "last after low", left: hook.PriorityLast, right: hook.PriorityLow, want: false},
+		{name: "custom priority", left: hook.Priority(-1), right: hook.Priority(1), want: true},
 	}
 
 	for _, tt := range tests {
@@ -46,5 +47,23 @@ func TestPriorityBefore(t *testing.T) {
 				t.Fatalf("Before() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestPriorityConstantOrdering(t *testing.T) {
+	t.Parallel()
+
+	priorities := []hook.Priority{
+		hook.PriorityFirst,
+		hook.PriorityHigh,
+		hook.PriorityDefault,
+		hook.PriorityLow,
+		hook.PriorityLast,
+	}
+
+	for i := 1; i < len(priorities); i++ {
+		if !priorities[i-1].Before(priorities[i]) {
+			t.Fatalf("priority[%d] = %d should sort before priority[%d] = %d", i-1, priorities[i-1], i, priorities[i])
+		}
 	}
 }

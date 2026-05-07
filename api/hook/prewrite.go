@@ -30,10 +30,15 @@ import (
 // field slice, or return an error to stop the write according to the runtime
 // manager's policy.
 //
-// Implementations should treat the input field slice as read-only. When
-// changing fields, prefer returning a new slice or an explicitly owned slice
-// instead of mutating the input slice in place.
+// Implementations should treat the input field slice as read-only. When changing
+// fields, return a new slice or an explicitly owned slice instead of mutating the
+// input slice in place. Implementations that retain Entry must clone it first
+// when stack ownership is uncertain.
 type PreWriteHook interface {
 	// PreWrite transforms or rejects entry and fields before write.
+	//
+	// Returning a non-nil error is a veto signal. The hook package does not define
+	// whether the runtime drops the entry, reports the error to ErrorHook, or
+	// writes a fallback entry; that policy belongs to the runtime manager.
 	PreWrite(ctx context.Context, entry core.Entry, fields []field.Field) (core.Entry, []field.Field, error)
 }

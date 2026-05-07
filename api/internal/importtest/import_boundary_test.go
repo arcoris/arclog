@@ -110,6 +110,22 @@ func TestForbiddenImportReasonDocumentsPackageRules(t *testing.T) {
 			wantReason: "core may depend",
 		},
 		{
+			name:       "hook may import core",
+			pkgPath:    "hook",
+			importPath: apiImport + "core",
+		},
+		{
+			name:       "hook may import field",
+			pkgPath:    "hook",
+			importPath: apiImport + "field",
+		},
+		{
+			name:       "hook cannot import encoder",
+			pkgPath:    "hook",
+			importPath: apiImport + "encoder",
+			wantReason: "hook may depend",
+		},
+		{
 			name:       "clock cannot import other api packages",
 			pkgPath:    "clock",
 			importPath: apiImport + "core",
@@ -259,6 +275,10 @@ func forbiddenImportReason(pkgPath string, testFile bool, importPath string) str
 	case pkgPath == "field":
 		if !isAllowedAPIImport(importPath, "buffer", "encoder") {
 			return "field may depend only on encoder and buffer"
+		}
+	case pkgPath == "hook":
+		if !isAllowedAPIImport(importPath, "core", "field") {
+			return "hook may depend only on core entry metadata and field values"
 		}
 	case pkgPath == "level":
 		if !isAllowedAPIImport(importPath, "buffer") {

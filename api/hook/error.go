@@ -23,13 +23,21 @@ import (
 	"arcoris.dev/arclog/api/field"
 )
 
-// ErrorHook observes a write failure.
+// ErrorHook observes a write failure after the runtime write path reports it.
 //
 // ErrorHook does not return an error. Runtime managers should use their own
 // internal error reporting policy if an ErrorHook panics or fails indirectly.
 // Keeping this contract return-free avoids recursive "error while handling
 // error" semantics in the API layer.
+//
+// Entry and fields are borrowed for the duration of the call. Implementations
+// that retain either value must clone Entry when stack ownership is uncertain
+// and must copy the field slice.
 type ErrorHook interface {
 	// OnError observes a write failure.
+	//
+	// err may be nil only if a runtime manager chooses to signal an unusual
+	// condition without a concrete write error. Implementations that require a
+	// concrete error should check err before using it.
 	OnError(ctx context.Context, entry core.Entry, fields []field.Field, err error)
 }

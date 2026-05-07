@@ -42,6 +42,9 @@ func (managerContract) AddError(hook.ErrorHook, hook.Priority) hook.Registration
 }
 
 func (managerContract) FirePreWrite(ctx context.Context, entry core.Entry, fields []field.Field) (core.Entry, []field.Field, error) {
+	entry.Message = "checked"
+	fields = append(fields, field.String("phase", "pre"))
+
 	return entry, fields, nil
 }
 
@@ -59,8 +62,59 @@ func TestManagerContract(t *testing.T) {
 	t.Parallel()
 
 	manager := managerContract{}
-	registration := manager.AddPreWrite(nil, hook.PriorityDefault)
-	if !registration.Remove() {
-		t.Fatal("registration should remove successfully")
+
+	registrations := []struct {
+		name         string
+		registration hook.Registration
+	}{
+		{name: "pre-write", registration: manager.AddPreWrite(nil, hook.PriorityDefault)},
+		{name: "post-write", registration: manager.AddPostWrite(nil, hook.PriorityDefault)},
+		{name: "error", registration: manager.AddError(nil, hook.PriorityDefault)},
+	}
+
+	for _, tt := range registrations {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			if !tt.registration.Remove() {
+				t.Fatal("registration should remove successfully")
+			}
+		})
+	}
+}
+
+func TestManagerFirePreWriteReturnsAuthoritativeValues(t *testing.T) {
+	t.Parallel()
+
+	manager := managerContract{}
+	entry := core.Entry{Message: "input"}
+	fields := []field.Field{field.String("k", "v")}
+
+	gotEntry, gotFields, err := manager.FirePreWrite(context.Background(), entry, fields)
+	if err != nil {
+		t.Fatalf("FirePreWrite() error = %v", err)
+	}
+	if gotEntry.Message != "checked" {
+		t.Fatalf("Message = %q, want checked", gotEntry.Message)
+	}
+	if len(gotFields) != 2 {
+		t.Fatalf("len(fields) = %d, want 2", len(gotFields))
+	}
+}
+
+func TestManagerFirePostWriteAndErrorAndStop(t *testing.T) {
+	t.Parallel()
+
+	manager := managerContract{}
+
+	if err := manager.FirePostWrite(context.Background(), core.Entry{}, nil, hook.Success()); err != nil {
+		t.Fatalf("FirePostWrite() error = %v", err)
+	}
+
+	manager.FireError(context.Background(), core.Entry{}, nil, nil)
+
+	if err := manager.Stop(context.Background()); err != nil {
+		t.Fatalf("Stop() error = %v", err)
 	}
 }

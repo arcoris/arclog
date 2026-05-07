@@ -14,16 +14,29 @@
    limitations under the License.
 */
 
-package hook
+package hook_test
 
-// Named is an optional diagnostic identity contract for hooks.
-//
-// Names are useful for debugging, metrics, and configuration reports. They are
-// intentionally not required by PreWriteHook, PostWriteHook, ErrorHook, or
-// Manager because registration handles are a safer removal mechanism than global
-// name uniqueness. Empty names are allowed and mean that the hook does not
-// provide useful diagnostic identity.
-type Named interface {
-	// Name returns a stable diagnostic name for the hook.
-	Name() string
+import (
+	"context"
+	"testing"
+
+	"arcoris.dev/arclog/api/core"
+	"arcoris.dev/arclog/api/field"
+	"arcoris.dev/arclog/api/hook"
+)
+
+type postWriteHookContract struct{}
+
+var _ hook.PostWriteHook = postWriteHookContract{}
+
+func (postWriteHookContract) PostWrite(context.Context, core.Entry, []field.Field, hook.WriteResult) error {
+	return nil
+}
+
+func TestPostWriteHookContract(t *testing.T) {
+	t.Parallel()
+
+	if err := (postWriteHookContract{}).PostWrite(context.Background(), core.Entry{}, nil, hook.Success()); err != nil {
+		t.Fatalf("PostWrite() error = %v", err)
+	}
 }

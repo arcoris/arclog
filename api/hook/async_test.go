@@ -24,13 +24,22 @@ import (
 
 type asyncDeclaration bool
 
+var _ hook.AsyncHook = asyncDeclaration(false)
+
 func (a asyncDeclaration) Async() bool {
 	return bool(a)
+}
+
+type typedNilAsyncHook struct{}
+
+func (*typedNilAsyncHook) Async() bool {
+	panic("typed nil async hook should not be called")
 }
 
 func TestAllowsAsync(t *testing.T) {
 	t.Parallel()
 
+	var typedNil *typedNilAsyncHook
 	tests := []struct {
 		name string
 		hook any
@@ -40,6 +49,7 @@ func TestAllowsAsync(t *testing.T) {
 		{name: "declares sync", hook: asyncDeclaration(false), want: false},
 		{name: "no async contract", hook: struct{}{}, want: false},
 		{name: "nil", hook: nil, want: false},
+		{name: "typed nil async hook", hook: typedNil, want: false},
 	}
 
 	for _, tt := range tests {
@@ -51,5 +61,16 @@ func TestAllowsAsync(t *testing.T) {
 				t.Fatalf("AllowsAsync() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestAllowsAsyncDoesNotAllocate(t *testing.T) {
+	hookValue := asyncDeclaration(true)
+
+	allocs := testing.AllocsPerRun(1000, func() {
+		_ = hook.AllowsAsync(hookValue)
+	})
+	if allocs != 0 {
+		t.Fatalf("allocs per AllowsAsync() = %g, want 0", allocs)
 	}
 }
