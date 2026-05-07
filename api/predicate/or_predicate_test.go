@@ -48,7 +48,7 @@ func TestOrPredicateSnapshotsOperands(t *testing.T) {
 
 func TestOrPredicateEvaluationDoesNotAllocate(t *testing.T) {
 	p := predicate.Or(falsePredicate(), truePredicate())
-	entry := predicate.Entry{Level: level.Info, Logger: "api"}
+	entry := predicate.Entry{Level: level.Info, LoggerName: "api"}
 	fields := []field.Field{field.String("service", "auth")}
 
 	allocs := testing.AllocsPerRun(1000, func() {

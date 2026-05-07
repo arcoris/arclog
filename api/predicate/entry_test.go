@@ -17,9 +17,11 @@
 package predicate_test
 
 import (
+	"reflect"
 	"testing"
 
 	"arcoris.dev/arclog/api/caller"
+	"arcoris.dev/arclog/api/core"
 	"arcoris.dev/arclog/api/level"
 	"arcoris.dev/arclog/api/predicate"
 )
@@ -32,8 +34,8 @@ func TestEntryZeroValue(t *testing.T) {
 	if entry.Level != level.Debug {
 		t.Fatalf("Level = %s, want zero-value level %s", entry.Level, level.Debug)
 	}
-	if entry.Logger != "" {
-		t.Fatalf("Logger = %q, want empty string", entry.Logger)
+	if entry.LoggerName != "" {
+		t.Fatalf("LoggerName = %q, want empty string", entry.LoggerName)
 	}
 	if entry.Message != "" {
 		t.Fatalf("Message = %q, want empty string", entry.Message)
@@ -43,13 +45,24 @@ func TestEntryZeroValue(t *testing.T) {
 	}
 }
 
+func TestEntryUsesCoreEntryContract(t *testing.T) {
+	t.Parallel()
+
+	var entry predicate.Entry = core.Entry{LoggerName: "api"}
+	var coreEntry core.Entry = entry
+
+	if coreEntry.LoggerName != "api" {
+		t.Fatalf("LoggerName = %q, want %q", coreEntry.LoggerName, "api")
+	}
+}
+
 func TestEntryCarriesAPILayerMetadata(t *testing.T) {
 	t.Parallel()
 
 	want := predicate.Entry{
-		Level:   level.Warn,
-		Logger:  "api",
-		Message: "connected",
+		Level:      level.Warn,
+		LoggerName: "api",
+		Message:    "connected",
 		Caller: caller.Caller{
 			Defined:  true,
 			File:     "logger.go",
@@ -59,7 +72,7 @@ func TestEntryCarriesAPILayerMetadata(t *testing.T) {
 	}
 
 	got := want
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Entry = %#v, want %#v", got, want)
 	}
 }

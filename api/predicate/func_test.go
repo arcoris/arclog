@@ -17,6 +17,7 @@
 package predicate_test
 
 import (
+	"reflect"
 	"testing"
 
 	"arcoris.dev/arclog/api/field"
@@ -28,9 +29,9 @@ func TestFuncAdapterPassesEntryAndFields(t *testing.T) {
 	t.Parallel()
 
 	entry := predicate.Entry{
-		Level:   level.Warn,
-		Logger:  "api",
-		Message: "connected",
+		Level:      level.Warn,
+		LoggerName: "api",
+		Message:    "connected",
 	}
 	fields := []field.Field{field.String("service", "auth")}
 
@@ -53,7 +54,7 @@ func TestFuncAdapterPassesEntryAndFields(t *testing.T) {
 	if !called {
 		t.Fatal("underlying function was not called")
 	}
-	if gotEntry != entry {
+	if !reflect.DeepEqual(gotEntry, entry) {
 		t.Fatalf("entry = %#v, want %#v", gotEntry, entry)
 	}
 	if len(gotFields) != len(fields) || !gotFields[0].Equal(fields[0]) {

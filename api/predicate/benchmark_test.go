@@ -72,7 +72,7 @@ func BenchmarkDecisiveConstantConstruction(b *testing.B) {
 }
 
 func benchmarkEvaluation(b *testing.B, p predicate.Predicate) {
-	entry := predicate.Entry{Level: level.Info, Logger: "api"}
+	entry := predicate.Entry{Level: level.Info, LoggerName: "api"}
 	fields := []field.Field{field.String("service", "auth")}
 
 	b.Helper()

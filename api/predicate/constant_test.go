@@ -27,7 +27,7 @@ import (
 func TestAlwaysAndNever(t *testing.T) {
 	t.Parallel()
 
-	entry := predicate.Entry{Level: level.Error, Logger: "api"}
+	entry := predicate.Entry{Level: level.Error, LoggerName: "api"}
 	fields := []field.Field{field.String("service", "auth")}
 
 	tests := []struct {
@@ -52,7 +52,7 @@ func TestAlwaysAndNever(t *testing.T) {
 }
 
 func TestConstantEvaluationDoesNotAllocate(t *testing.T) {
-	entry := predicate.Entry{Level: level.Info, Logger: "api"}
+	entry := predicate.Entry{Level: level.Info, LoggerName: "api"}
 	fields := []field.Field{field.String("service", "auth")}
 
 	tests := []struct {

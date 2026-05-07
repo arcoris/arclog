@@ -22,11 +22,15 @@ import "arcoris.dev/arclog/api/field"
 // pipeline.
 //
 // ShouldLog returns true when the entry is accepted and false when it is
-// suppressed. Implementations must not mutate entry or fields, and must not
-// retain fields beyond the call unless they document and enforce a stronger
-// ownership contract. Because predicates are usually shared by loggers, cores,
-// hooks, or writer routes, implementations must be safe for concurrent calls
-// unless the concrete type explicitly documents a narrower contract.
+// suppressed. Implementations must not mutate entry or fields. If an
+// implementation retains Entry beyond the call, it must first clone the entry
+// when retained stack frames may alias caller-owned storage. Implementations
+// must not retain fields beyond the call unless they document and enforce a
+// stronger ownership contract.
+//
+// Because predicates are usually shared by loggers, cores, hooks, or writer
+// routes, implementations must be safe for concurrent calls unless the concrete
+// type explicitly documents a narrower contract.
 //
 // A nil Predicate is invalid. Use Always to represent an absent predicate and
 // Never to represent an intentionally disabled route.
@@ -35,7 +39,9 @@ type Predicate interface {
 	//
 	// The fields slice is borrowed. Implementations may inspect Field values but
 	// must not mutate the slice, mutate retained payloads such as []byte values,
-	// or retain references to the slice for later use. Expensive work should be
-	// avoided because predicates may run before every encode or write attempt.
+	// or retain references to the slice for later use. Entry should also be
+	// treated as borrowed metadata when its Stack is not known to be independent.
+	// Expensive work should be avoided because predicates may run before every
+	// encode or write attempt.
 	ShouldLog(entry Entry, fields []field.Field) bool
 }

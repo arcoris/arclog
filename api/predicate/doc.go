@@ -18,8 +18,8 @@
 // log entry should continue through a runtime pipeline.
 //
 // Predicates sit above level thresholds. A level enabler answers whether a
-// severity is enabled; a predicate may also inspect entry metadata and already
-// constructed fields to express routing, sampling, hook selection, or
+// severity is enabled; a predicate may also inspect core entry metadata and
+// already constructed fields to express routing, sampling, hook selection, or
 // application policy. This package is only the contract layer. It does not
 // implement cores, hooks, encoders, writers, registries, or runtime stack
 // capture.
@@ -35,11 +35,14 @@
 // intentionally disabled. Composition helpers do not validate every operand at
 // construction time; nil operands panic if evaluation reaches them.
 //
-// Entry is a small metadata value owned by the caller. The []field.Field slice
-// passed to ShouldLog is borrowed for the duration of the call; predicates may
-// inspect it but must not retain or mutate it. Caller information may be
-// undefined because runtime caller capture can be expensive and may happen after
-// predicate checks in some pipelines.
+// Entry is an alias for core.Entry, making core the source of truth for
+// log-entry metadata. The []field.Field slice passed to ShouldLog is borrowed
+// for the duration of the call; predicates may inspect it but must not retain or
+// mutate it. Entry should also be treated as borrowed unless the implementation
+// clones it before retention, because captured stack frames may reference
+// caller-owned slice storage. Caller information may be undefined because
+// runtime caller capture can be expensive and may happen after predicate checks
+// in some pipelines.
 //
 // The composition helpers preserve boolean short-circuiting and keep an
 // immutable snapshot of their operands. Mutating the slice used to construct a
