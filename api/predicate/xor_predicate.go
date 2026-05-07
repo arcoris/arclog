@@ -1,0 +1,61 @@
+/*
+   Copyright 2026 The ARCORIS Authors.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
+package predicate
+
+import "arcoris.dev/arclog/api/field"
+
+// xorPredicate owns an immutable snapshot of operands for exactly-one
+// evaluation.
+//
+// The slice must only be created from a caller-independent backing array. The
+// constructor enforces that invariant; ShouldLog relies on it and performs no
+// defensive copying while evaluating a log entry.
+type xorPredicate []Predicate
+
+// newXorPredicate returns the narrowest XOR representation for operands.
+//
+// operands must already be caller-independent and must not contain removable
+// false constants. Returning a single operand is safe because XOR with one
+// operand is equivalent to that operand.
+func newXorPredicate(operands []Predicate) Predicate {
+	switch len(operands) {
+	case 0:
+		return Never()
+	case 1:
+		return operands[0]
+	default:
+		return xorPredicate(operands)
+	}
+}
+
+// ShouldLog returns true only when exactly one operand accepts the entry.
+//
+// Evaluation exits as soon as a second true result is observed. That preserves
+// the exactly-one contract while avoiding unnecessary predicate calls in the
+// common "already impossible" case.
+func (p xorPredicate) ShouldLog(entry Entry, fields []field.Field) bool {
+	trueCount := 0
+	for _, predicate := range p {
+		if predicate.ShouldLog(entry, fields) {
+			trueCount++
+			if trueCount == 2 {
+				return false
+			}
+		}
+	}
+	return trueCount == 1
+}
