@@ -17,12 +17,12 @@
 // Package api documents the stable extension-contract layer for arclog.
 //
 // Packages below api define the small contracts and value types that runtime
-// loggers, cores, encoders, fields, predicates, writers, and third-party plugins
-// can share. The API layer is the vocabulary for extension points, not the place
-// where runtime behavior is implemented. Concrete logger facades, concrete core
-// implementations, sinks, JSON or console encoders, caller capture, predicate
-// policy wiring, hook managers, writer adapters, and clock selection belong
-// outside api.
+// loggers, cores, encoders, fields, predicates, writers, clocks, and third-party
+// plugins can share. The API layer is the vocabulary for extension points, not
+// the place where runtime behavior is implemented. Concrete logger facades,
+// concrete core implementations, sinks, JSON or console encoders, caller
+// capture, predicate policy wiring, hook managers, writer adapters, and clock
+// selection belong outside api.
 //
 // The root arcoris.dev/arclog package is expected to be the user-facing facade.
 // API packages must stay dependency-light and must not import the root package,

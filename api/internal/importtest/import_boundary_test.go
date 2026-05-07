@@ -110,6 +110,12 @@ func TestForbiddenImportReasonDocumentsPackageRules(t *testing.T) {
 			wantReason: "core may depend",
 		},
 		{
+			name:       "clock cannot import other api packages",
+			pkgPath:    "clock",
+			importPath: apiImport + "core",
+			wantReason: "clock is a timestamp-source",
+		},
+		{
 			name:       "field may import encoder subpackages",
 			pkgPath:    "field",
 			importPath: apiImport + "encoder/encoders",
@@ -233,6 +239,10 @@ func forbiddenImportReason(pkgPath string, testFile bool, importPath string) str
 	case pkgPath == "caller":
 		if !isAllowedAPIImport(importPath, "buffer") {
 			return "caller may depend only on buffer for returned-buffer encoder contracts"
+		}
+	case pkgPath == "clock":
+		if isAPIImportPath(importPath) {
+			return "clock is a timestamp-source contract package and must not depend on other api packages"
 		}
 	case pkgPath == "core":
 		if !isAllowedAPIImport(importPath, "caller", "field", "level", "stack") {
