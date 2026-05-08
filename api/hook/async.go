@@ -16,7 +16,9 @@
 
 package hook
 
-import "reflect"
+import (
+	"arcoris.dev/arclog/api/internal/nilx"
+)
 
 // AsyncHook marks a hook that may be executed asynchronously by a runtime
 // manager.
@@ -40,29 +42,10 @@ type AsyncHook interface {
 // treated as synchronous-only. AllowsAsync does not recover panics from Async;
 // the Async method is part of the hook's own contract.
 func AllowsAsync(h any) bool {
-	if isNilHook(h) {
+	if nilx.IsNil(h) {
 		return false
 	}
 
 	async, ok := h.(AsyncHook)
 	return ok && async.Async()
-}
-
-func isNilHook(h any) bool {
-	if h == nil {
-		return true
-	}
-
-	value := reflect.ValueOf(h)
-	switch value.Kind() {
-	case reflect.Chan,
-		reflect.Func,
-		reflect.Interface,
-		reflect.Map,
-		reflect.Pointer,
-		reflect.Slice:
-		return value.IsNil()
-	default:
-		return false
-	}
 }
