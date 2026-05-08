@@ -53,4 +53,9 @@
 // Primitive append operations do not return errors. Structured operations that
 // execute user-provided marshalers or reflection paths return an error so
 // implementations can propagate marshaling failures to the caller.
+//
+// Implementations should document their nil-marshaler policy. This package
+// defines the method shapes and returned-buffer contract; it does not impose
+// JSON null behavior, console placeholders, reflection traversal, namespace
+// delimiters, or panic recovery.
 package encoder

@@ -20,8 +20,10 @@ import "reflect"
 
 // IsNil reports whether value is nil or contains a typed nil value.
 //
-// IsNil does not call methods on value. Non-nil scalar values, structs, and
-// arrays always report false because they cannot be nil.
+// IsNil returns true for nil interfaces and for typed nil channels, functions,
+// interfaces, maps, pointers, and slices. It does not call methods on value.
+// Non-nil scalar values, structs, and arrays always report false because they
+// cannot be nil.
 func IsNil(value any) bool {
 	if value == nil {
 		return true

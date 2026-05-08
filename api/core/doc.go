@@ -21,6 +21,10 @@
 // Core interface that accepts entries, CheckedEntry as the result of the check
 // phase, and small pure core combinators such as Tee and Noop.
 //
+// Entry is the source-of-truth metadata shape for the API layer. Structured
+// fields are passed separately so call-site fields, context fields, hook-added
+// fields, and core-attached fields can keep explicit ownership rules.
+//
 // # Responsibility boundary
 //
 // Core contracts operate on Entry and []field.Field. They do not define JSON,
@@ -42,6 +46,8 @@
 // encoders, buffers, writers, and runtime configuration. Noop is a no-op Core.
 // Tee composes multiple Core values. I/O cores, sampled cores, async cores,
 // hook managers, and encoder-backed cores belong outside this API package.
+// Fatal process termination, Panic re-panicking, caller/stack capture, and
+// predicate wiring are also runtime policies rather than Core behavior.
 //
 // # Ownership
 //
@@ -49,4 +55,9 @@
 // must be treated as read-only unless the implementation owns the complete
 // pipeline and documents a stronger contract. Implementations that retain fields
 // after a call returns must copy the slice.
+//
+// Core implementations are commonly shared by loggers. Implementations should
+// be safe for concurrent calls unless their concrete documentation states a
+// narrower contract. The API package's Noop and Tee primitives contain no
+// mutable per-entry state.
 package core

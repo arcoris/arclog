@@ -23,4 +23,7 @@
 //
 // This package is an implementation detail of the api tree. It is not a public
 // arclog extension contract and should not grow into a generic utility package.
+// It exists to keep typed-nil behavior consistent in constructors and
+// conversion functions without exporting that inspection policy to plugin
+// authors.
 package nilx

@@ -34,11 +34,20 @@
 // deliberately does not import field. The intended direction is:
 //
 //	field -> encoder -> buffer
+//	core -> field / level / caller / stack
+//	predicate -> core / field
+//	hook -> core / field
 //
 // Packages that sit above entry metadata, such as predicate, should depend on
 // core.Entry rather than inventing their own entry shape. That keeps core as the
 // source of truth for entry metadata while still allowing fields to stay
 // caller-owned and passed separately.
+//
+// Writer contracts sit below already encoded byte output and should not depend
+// on higher-level entry packages. Clock contracts are timestamp sources only and
+// should remain standard-library-only. API-internal packages such as
+// api/internal/nilx are narrow implementation details for API packages, not
+// extension points for plugins.
 //
 // Encoder contracts intentionally pass and return *buffer.Buffer. Callers must
 // continue with the returned buffer, which leaves room for low-allocation paths,

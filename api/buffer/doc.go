@@ -14,12 +14,15 @@
    limitations under the License.
 */
 
-// Package buffer defines the low-level byte buffer contract used by ARCORIS
+// Package buffer defines the low-level byte accumulation type used by ARCORIS
 // logging encoders and logging cores.
 //
 // The package is intentionally small and allocation-aware. It provides a
-// concrete Buffer implementation backed by a growable byte slice, plus a Pool
-// adapter that delegates reusable-object lifecycle to arcoris.dev/pool.
+// concrete *Buffer implementation backed by a growable byte slice, plus a Pool
+// adapter that delegates reusable-object lifecycle to arcoris.dev/pool. The
+// concrete type is intentional: the API avoids publishing broad buffer
+// interfaces so future implementations do not freeze more method surface than
+// encoder contracts actually need.
 // Encoders use Buffer as scratch space while constructing serialized records
 // such as JSON log lines.
 //

@@ -22,6 +22,7 @@
 // allocation-aware field union than to zerolog's mutable event builder: fields
 // are value objects that can be created at call sites, passed through level and
 // core checks, and dispatched later only if the log entry is actually written.
+// The zero value is Skip and performs no work.
 //
 // # Responsibility boundary
 //
@@ -30,6 +31,8 @@
 // sinks; it does not decide whether an entry is enabled; and it does not manage
 // logger, core, hook, or writer lifecycle. Concrete formatting belongs to
 // runtime encoders that implement encoder.ObjectEncoder and encoder.ArrayEncoder.
+// Field.AddTo is delayed API-level dispatch into those contracts, not a concrete
+// encoder implementation.
 //
 // # Dependency direction
 //
@@ -64,4 +67,8 @@
 // must remain safe to observe until the field is encoded. Use an application-
 // level copy before constructing a field when mutation or asynchronous retention
 // is possible.
+//
+// Field values themselves are ordinary Go values and may be copied. Copying a
+// Field does not deep-copy Interface payloads or byte slices referenced by that
+// field.
 package field

@@ -14,6 +14,12 @@
    limitations under the License.
 */
 
+// Package importtest verifies the import boundaries of the api tree.
+//
+// The tests in this package are intentionally small and repository-local. They
+// are not a general static analyzer; they only protect the dependency rules that
+// keep API packages independent from runtime implementations, the root facade,
+// and accidental package cycles.
 package importtest
 
 import (
@@ -118,6 +124,11 @@ func TestForbiddenImportReasonDocumentsPackageRules(t *testing.T) {
 			name:       "hook may import field",
 			pkgPath:    "hook",
 			importPath: apiImport + "field",
+		},
+		{
+			name:       "hook may import api internal nilx",
+			pkgPath:    "hook",
+			importPath: apiImport + "internal/nilx",
 		},
 		{
 			name:       "hook cannot import encoder",
@@ -306,8 +317,8 @@ func forbiddenImportReason(pkgPath string, testFile bool, importPath string) str
 			return "field may depend only on encoder, buffer, and api-internal nil inspection"
 		}
 	case pkgPath == "hook":
-		if !isAllowedAPIImport(importPath, "core", "field") {
-			return "hook may depend only on core entry metadata and field values"
+		if !isAllowedAPIImport(importPath, "core", "field", "internal/nilx") {
+			return "hook may depend only on core entry metadata, field values, and api-internal nil inspection"
 		}
 	case pkgPath == "level":
 		if !isAllowedAPIImport(importPath, "buffer") {
