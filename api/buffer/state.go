@@ -20,7 +20,7 @@ package buffer
 //
 // The returned slice aliases the buffer's internal storage. Callers MUST treat
 // it as read-only, MUST NOT mutate it, and MUST NOT retain it after the next
-// mutation, Reset, Free, or Pool.Put.
+// mutation or Reset.
 func (b *Buffer) Bytes() []byte {
 	return b.data
 }
@@ -49,24 +49,8 @@ func (b *Buffer) Cap() int {
 
 // Reset clears the current contents while retaining reusable capacity.
 //
-// Reset does not return the buffer to a pool. Use Free or Pool.Put when the
-// caller is done with the buffer.
+// Reset does not release memory and does not return the buffer to any pool.
+// Pooling and retention policy belong to runtime packages.
 func (b *Buffer) Reset() {
 	b.data = b.data[:0]
-}
-
-// Free returns the buffer to its originating pool.
-//
-// After Free returns, the caller MUST treat the buffer and all slices returned
-// by Bytes as invalid. Free is a no-op for nil buffers and for zero-value
-// buffers that are not associated with a pool.
-//
-// Encoder implementations should not call Free unless they explicitly own the
-// buffer being released. The usual encoder contract leaves buffer lifetime with
-// the caller.
-func (b *Buffer) Free() {
-	if b == nil {
-		return
-	}
-	b.pool.Put(b)
 }

@@ -173,7 +173,13 @@ func TestForbiddenImportReasonDocumentsPackageRules(t *testing.T) {
 			name:       "buffer cannot import domain packages",
 			pkgPath:    "buffer",
 			importPath: apiImport + "field",
-			wantReason: "buffer must stay",
+			wantReason: "buffer must remain stdlib-only",
+		},
+		{
+			name:       "buffer cannot import external pool packages",
+			pkgPath:    "buffer",
+			importPath: "arcoris.dev/pool",
+			wantReason: "buffer must remain stdlib-only",
 		},
 		{
 			name:       "external tests may import public API packages",
@@ -263,6 +269,10 @@ func forbiddenImportReason(pkgPath string, testFile bool, importPath string) str
 	}
 	if strings.HasPrefix(importPath, rootImport+"/internal/") {
 		return "api packages must not depend on repository-internal implementation packages"
+	}
+
+	if pkgPath == "buffer" && !testFile && !isStandardLibraryImport(importPath) {
+		return "buffer must remain stdlib-only; pooling and retention policy belong to runtime packages"
 	}
 
 	if !strings.HasPrefix(importPath, apiImport) {
@@ -395,6 +405,11 @@ func isAllowedAPIImport(importPath string, allowedPkgPaths ...string) bool {
 
 func isPackageOrSubpackage(pkgPath, base string) bool {
 	return pkgPath == base || strings.HasPrefix(pkgPath, base+"/")
+}
+
+func isStandardLibraryImport(importPath string) bool {
+	first, _, _ := strings.Cut(importPath, "/")
+	return !strings.Contains(first, ".")
 }
 
 // isGeneratedGoFile follows the standard "Code generated ... DO NOT EDIT."

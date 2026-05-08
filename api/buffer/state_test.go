@@ -70,20 +70,46 @@ func TestBufferNewAndString(t *testing.T) {
 	}
 }
 
-func TestBufferFreeWithoutPoolIsNoop(t *testing.T) {
-	buf := newBuffer()
-	buf.AppendString("data")
+func TestNewNegativeCapacity(t *testing.T) {
+	t.Parallel()
 
-	buf.Free()
+	buf := buffer.New(-1)
 
-	// Free on a zero-value buffer is deliberately a no-op. The buffer remains
-	// usable because no pool owns it and no reuse can race with this test.
-	if got, want := string(buf.Bytes()), "data"; got != want {
-		t.Fatalf("Bytes after Free without pool = %q, want %q", got, want)
+	if got := buf.Cap(); got != 0 {
+		t.Fatalf("Cap = %d, want 0", got)
 	}
 }
 
-func TestNilBufferFreeIsNoop(t *testing.T) {
-	var buf *buffer.Buffer
-	buf.Free()
+func TestZeroValueBuffer(t *testing.T) {
+	t.Parallel()
+
+	var buf buffer.Buffer
+	if got := buf.Len(); got != 0 {
+		t.Fatalf("Len = %d, want 0", got)
+	}
+	if got := buf.String(); got != "" {
+		t.Fatalf("String = %q, want empty", got)
+	}
+
+	buf.AppendString("ready")
+	if got := buf.String(); got != "ready" {
+		t.Fatalf("String after AppendString = %q, want %q", got, "ready")
+	}
+}
+
+func TestBytesAliasing(t *testing.T) {
+	t.Parallel()
+
+	buf := buffer.New(0)
+	buf.AppendString("abc")
+
+	view := buf.Bytes()
+	buf.AppendString("d")
+
+	if got, want := string(view), "abc"; got != want {
+		t.Fatalf("borrowed view = %q, want %q", got, want)
+	}
+	if got, want := string(buf.Bytes()), "abcd"; got != want {
+		t.Fatalf("buffer bytes = %q, want %q", got, want)
+	}
 }

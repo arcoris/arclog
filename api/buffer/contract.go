@@ -26,14 +26,14 @@ import (
 // not on broad interfaces that would freeze more API surface than needed.
 //
 // The contract is split by responsibility so the required method groups remain
-// readable: writes, primitive appends, borrowed views, and lifecycle. Keeping
+// readable: writes, primitive appends, borrowed views, and reset state. Keeping
 // the shape unexported also makes accidental broad public interface exposure
 // less likely.
 type bufferContract interface {
 	writerContract
 	appendContract
 	viewContract
-	lifecycleContract
+	stateContract
 }
 
 var _ bufferContract = (*Buffer)(nil)
@@ -84,8 +84,8 @@ type viewContract interface {
 	Cap() int
 }
 
-// lifecycleContract verifies explicit buffer reuse and release operations.
-type lifecycleContract interface {
+// stateContract verifies logical reset without implying pooling or release
+// lifecycle.
+type stateContract interface {
 	Reset()
-	Free()
 }

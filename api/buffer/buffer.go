@@ -16,12 +16,12 @@
 
 package buffer
 
-// Buffer is a reusable, growable byte buffer for encoded log records and other
-// serialized payloads produced by the logging pipeline.
+// Buffer is a growable byte buffer for encoded log records and other serialized
+// payloads produced by the logging pipeline.
 //
-// The zero value is ready to use. A zero-value Buffer is not attached to any
-// Pool; calling Free on such a buffer is a no-op. Buffers obtained from a Pool
-// remember their originating pool and Free returns them to that pool.
+// The zero value is ready to use. Buffer owns only mutable byte accumulation and
+// logical reset semantics; pooling, object lifecycle, and retention policy
+// belong to runtime packages that depend on this API package.
 //
 // Buffer is not safe for concurrent use. A caller that shares a Buffer between
 // goroutines MUST synchronize all method calls and all access to slices returned
@@ -30,28 +30,24 @@ type Buffer struct {
 	// data stores the current logical contents of the buffer. len(data) is the
 	// number of valid bytes and cap(data) is reusable storage.
 	data []byte
-
-	// pool is the originating Pool. It is set by Pool.Get and NewWithPool so
-	// that Free can return the buffer to the correct pool.
-	pool Pool
 }
 
-// New creates a standalone Buffer with the provided initial capacity.
+// New creates a Buffer with the provided initial capacity.
 //
 // If capacity is negative, it is treated as 0. The returned buffer is not
-// attached to a Pool; calling Free on it is a no-op.
+// attached to a pool; runtime pooling packages should allocate or reset buffers
+// explicitly around this concrete type.
 func New(capacity int) *Buffer {
-	return NewWithPool(Pool{}, capacity)
-}
-
-// NewWithPool creates a Buffer with the provided initial capacity and
-// originating pool.
-//
-// This constructor is intended for pooling infrastructure. Most callers SHOULD
-// acquire buffers with Pool.Get. If capacity is negative, it is treated as 0.
-func NewWithPool(pool Pool, capacity int) *Buffer {
 	return &Buffer{
 		data: make([]byte, 0, normalizeCapacity(capacity)),
-		pool: pool,
 	}
+}
+
+// normalizeCapacity keeps public constructor behavior explicit without exposing
+// a runtime allocation policy knob.
+func normalizeCapacity(capacity int) int {
+	if capacity < 0 {
+		return 0
+	}
+	return capacity
 }
