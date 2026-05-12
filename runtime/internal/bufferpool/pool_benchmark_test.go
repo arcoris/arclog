@@ -28,7 +28,7 @@ var (
 	benchmarkBufferSink *buffer.Buffer
 )
 
-func BenchmarkGetPut(b *testing.B) {
+func BenchmarkPoolGetPut(b *testing.B) {
 	p := New()
 
 	b.ReportAllocs()
@@ -41,27 +41,35 @@ func BenchmarkGetPut(b *testing.B) {
 	}
 }
 
-func BenchmarkGetPutSmallRecord(b *testing.B) {
+func BenchmarkPoolGetAppendSmallPut(b *testing.B) {
 	p := New()
+	const smallRecord = `{"level":"info","msg":"ok"}`
 
+	// This benchmark intentionally includes the cost of appending a small
+	// record that stays within the pool's default initial capacity.
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		buf := p.Get()
-		buf.AppendString(`{"level":"info","msg":"ok"}`)
+		buf.AppendString(smallRecord)
 		benchmarkBytesSink = buf.Bytes()
 		p.Put(buf)
 	}
 }
 
-func BenchmarkGetPutWithinRetention(b *testing.B) {
+func BenchmarkPoolGetAppendWithinRetentionPut(b *testing.B) {
 	p := NewWithOptions(Options{
 		InitialCapacity:     1024,
 		MaxRetainedCapacity: 4 * 1024,
 	})
 	payload := make([]byte, 3*1024)
+	warm := p.Get()
+	warm.AppendBytes(payload)
+	p.Put(warm)
 
+	// This benchmark intentionally includes payload copy cost, but warms the
+	// pool first so the timed loop measures the steady retained path.
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -73,13 +81,39 @@ func BenchmarkGetPutWithinRetention(b *testing.B) {
 	}
 }
 
-func BenchmarkPutOversizedDrop(b *testing.B) {
+func BenchmarkPoolGetPutRetainedGrownBuffer(b *testing.B) {
+	p := NewWithOptions(Options{
+		InitialCapacity:     1024,
+		MaxRetainedCapacity: 4 * 1024,
+	})
+	payload := make([]byte, 3*1024)
+	warm := p.Get()
+	warm.AppendBytes(payload)
+	p.Put(warm)
+
+	// This isolates Get/Put overhead when the pool already retains a grown
+	// buffer that is still within the configured retention ceiling.
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		buf := p.Get()
+		benchmarkBufferSink = buf
+		p.Put(buf)
+	}
+}
+
+func BenchmarkPoolOversizedLifecycleDrop(b *testing.B) {
 	p := NewWithOptions(Options{
 		InitialCapacity:     256,
 		MaxRetainedCapacity: 1024,
 	})
 	payload := make([]byte, 2048)
 
+	// This benchmark includes buffer growth because the pool intentionally drops
+	// buffers above MaxRetainedCapacity instead of retaining them for the next
+	// iteration. It documents the cost of repeated oversized records, not the
+	// normal logging hot path.
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -91,9 +125,11 @@ func BenchmarkPutOversizedDrop(b *testing.B) {
 	}
 }
 
-func BenchmarkZeroValuePoolGetPut(b *testing.B) {
+func BenchmarkPoolZeroValueFallback(b *testing.B) {
 	var p Pool
 
+	// The zero-value Pool is safe but non-pooling. This benchmark is not the
+	// runtime hot path; it documents fallback cost only.
 	b.ReportAllocs()
 	b.ResetTimer()
 
@@ -111,6 +147,9 @@ func BenchmarkSyncPoolBaselineGetPut(b *testing.B) {
 		},
 	}
 
+	// This is a raw lower-bound comparison for sync.Pool. It is not
+	// feature-equivalent to Pool because it does not include arclog's retention
+	// predicate, oversized-drop policy, zero-value fallback, or ownership docs.
 	b.ReportAllocs()
 	b.ResetTimer()
 
