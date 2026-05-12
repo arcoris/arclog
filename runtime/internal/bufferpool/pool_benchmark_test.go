@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	benchmarkBytesSink  []byte
+	benchmarkLenSink    int
 	benchmarkBufferSink *buffer.Buffer
 )
 
@@ -53,7 +53,7 @@ func BenchmarkPoolGetAppendSmallPut(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		buf := p.Get()
 		buf.AppendString(smallRecord)
-		benchmarkBytesSink = buf.Bytes()
+		benchmarkLenSink = len(buf.Bytes())
 		p.Put(buf)
 	}
 }
@@ -76,7 +76,7 @@ func BenchmarkPoolGetAppendWithinRetentionPut(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		buf := p.Get()
 		buf.AppendBytes(payload)
-		benchmarkBytesSink = buf.Bytes()
+		benchmarkLenSink = len(buf.Bytes())
 		p.Put(buf)
 	}
 }
@@ -120,7 +120,7 @@ func BenchmarkPoolOversizedLifecycleDrop(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		buf := p.Get()
 		buf.AppendBytes(payload)
-		benchmarkBytesSink = buf.Bytes()
+		benchmarkLenSink = len(buf.Bytes())
 		p.Put(buf)
 	}
 }
