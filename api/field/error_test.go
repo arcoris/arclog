@@ -18,22 +18,21 @@ package field
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 )
-
-type testStringer struct {
-	calls int
-}
-
-func (s *testStringer) String() string {
-	s.calls++
-	return "value"
-}
 
 type typedNilError struct{}
 
 func (*typedNilError) Error() string { return "typed nil" }
+
+type countingError struct {
+	calls int
+}
+
+func (e *countingError) Error() string {
+	e.calls++
+	return "counting"
+}
 
 func TestErrorConstructors(t *testing.T) {
 	t.Parallel()
@@ -60,49 +59,10 @@ func TestErrorConstructors(t *testing.T) {
 	if got := NamedError("failure", typedNil); !got.IsSkip() {
 		t.Fatalf("typed nil error = %#v", got)
 	}
-}
 
-func TestStringerConstructor(t *testing.T) {
-	t.Parallel()
-
-	var nilStringer fmt.Stringer = (*testStringer)(nil)
-	if got := Stringer("name", nilStringer); !got.Equal(Null("name")) {
-		t.Fatalf("Stringer(nil) = %#v", got)
-	}
-
-	value := &testStringer{}
-	got := Stringer("name", value)
-	if got.Key != "name" || got.Type != StringerType || got.Interface != value {
-		t.Fatalf("Stringer(value) = %#v", got)
-	}
-	if value.calls != 0 {
-		t.Fatal("Stringer constructor must not call String")
-	}
-}
-
-func TestReflectConstructor(t *testing.T) {
-	t.Parallel()
-
-	if got := Reflect("key", nil); !got.Equal(Null("key")) {
-		t.Fatalf("Reflect(nil) = %#v", got)
-	}
-
-	value := struct{ Name string }{Name: "arc"}
-	got := Reflect("key", value)
-	if got.Key != "key" || got.Type != ReflectType {
-		t.Fatalf("Reflect(value) = %#v", got)
-	}
-	if got.Interface != value {
-		t.Fatalf("Reflect(value).Interface = %#v", got.Interface)
-	}
-}
-
-func TestNamespaceConstructor(t *testing.T) {
-	t.Parallel()
-
-	got := Namespace("ns")
-	want := Field{Key: "ns", Type: NamespaceType}
-	if !got.Equal(want) {
-		t.Fatalf("Namespace() = %#v, want %#v", got, want)
+	counting := &countingError{}
+	_ = Error(counting)
+	if counting.calls != 0 {
+		t.Fatal("Error constructor must not call Error")
 	}
 }

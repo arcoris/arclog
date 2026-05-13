@@ -43,6 +43,7 @@ func TestEqual(t *testing.T) {
 		{name: "different type", a: String("k", "v"), b: Bytes("k", []byte("v")), want: false},
 		{name: "different value", a: String("k", "a"), b: String("k", "b"), want: false},
 		{name: "bytes content", a: Bytes("k", bytesA), b: Bytes("k", bytesB), want: true},
+		{name: "bytes different content", a: Bytes("k", []byte("same")), b: Bytes("k", []byte("diff")), want: false},
 		{name: "full time equal", a: Time("k", timeA), b: Time("k", timeB), want: true},
 		{name: "time full different", a: Time("k", timeA), b: Time("k", timeA.Add(time.Second)), want: false},
 		{name: "reflect equal", a: Reflect("k", struct{ A int }{A: 1}), b: Reflect("k", struct{ A int }{A: 1}), want: true},

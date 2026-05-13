@@ -17,11 +17,25 @@
 package field
 
 // Field is a compact descriptor for one structured log field.
+//
+// Key stores the field name. Type identifies which storage slot is meaningful.
+// Integer stores bools, signed integers, unsigned integer bit patterns, float
+// bit patterns, duration nanoseconds, and compact time Unix nanoseconds. String
+// stores string values. Bytes stores borrowed byte slices for BytesType.
+// Interface stores slow or special values, including errors, stringers,
+// reflected values, full time values, and other non-inline payloads.
+//
+// Unsigned integer constructors store a bit-preserving representation in
+// Integer. Encoders must recover the value according to Type, for example
+// uint64(f.Integer) for Uint64Type.
+//
+// Float constructors store IEEE 754 bits in Integer.
 type Field struct {
 	Key       string
 	Type      Type
 	Integer   int64
 	String    string
+	Bytes     []byte
 	Interface any
 }
 

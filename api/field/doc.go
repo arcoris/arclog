@@ -26,12 +26,12 @@
 // Constructors do not validate or normalize keys. Key policy belongs to
 // encoders or higher-level policy layers.
 //
-// Bytes stores borrowed byte slices. Callers must not mutate the slice until
-// the log call or context binding that consumes the field has finished
-// observing it.
+// Bytes is first-class borrowed storage for BytesType. Callers must not mutate
+// the slice until the log call or context binding that consumes the field has
+// finished observing it.
 //
-// Any is a convenience constructor that maps common Go values to typed fields
-// and falls back to Reflect.
+// Any is a convenience constructor, not a field storage kind. It maps common Go
+// values to typed fields and falls back to Reflect.
 //
 // Object, array, and custom marshaling contracts are intentionally out of scope
 // until api/encoder exists. Field.AddTo is intentionally not part of this

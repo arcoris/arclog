@@ -30,9 +30,7 @@ func (f Field) Equal(other Field) bool {
 
 	switch f.Type {
 	case BytesType:
-		left, _ := f.Interface.([]byte)
-		right, _ := other.Interface.([]byte)
-		return bytes.Equal(left, right)
+		return bytes.Equal(f.Bytes, other.Bytes)
 	case TimeType:
 		return reflect.DeepEqual(f.Interface, other.Interface)
 	case TimeFullType:
@@ -42,7 +40,7 @@ func (f Field) Equal(other Field) bool {
 			return left.Equal(right)
 		}
 		return reflect.DeepEqual(f.Interface, other.Interface)
-	case ReflectType, StringerType, ErrorType, AnyType:
+	case ReflectType, StringerType, ErrorType:
 		return reflect.DeepEqual(f.Interface, other.Interface)
 	default:
 		return f.Interface == other.Interface

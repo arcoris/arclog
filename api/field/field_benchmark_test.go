@@ -104,6 +104,14 @@ func BenchmarkAnyIntField(b *testing.B) {
 	}
 }
 
+func BenchmarkAnyBytesField(b *testing.B) {
+	value := []byte("payload")
+	b.ReportAllocs()
+	for b.Loop() {
+		benchmarkFieldSink = Any("data", value)
+	}
+}
+
 func BenchmarkAnyReflectFallbackField(b *testing.B) {
 	value := struct {
 		Name string

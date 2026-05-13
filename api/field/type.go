@@ -54,7 +54,6 @@ const (
 	NamespaceType
 	StringerType
 	ErrorType
-	AnyType
 )
 
 // String returns a stable diagnostic name for t.
@@ -108,8 +107,6 @@ func (t Type) String() string {
 		return "stringer"
 	case ErrorType:
 		return "error"
-	case AnyType:
-		return "any"
 	default:
 		return fmt.Sprintf("Type(%d)", t)
 	}

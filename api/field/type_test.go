@@ -50,7 +50,6 @@ func TestTypeString(t *testing.T) {
 		{name: "namespace", typ: NamespaceType, want: "namespace"},
 		{name: "stringer", typ: StringerType, want: "stringer"},
 		{name: "error", typ: ErrorType, want: "error"},
-		{name: "any", typ: AnyType, want: "any"},
 		{name: "unknown", typ: Type(255), want: "Type(255)"},
 	}
 

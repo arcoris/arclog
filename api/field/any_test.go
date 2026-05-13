@@ -124,6 +124,9 @@ func TestAny(t *testing.T) {
 			if !got.Equal(tt.want) {
 				t.Fatalf("Any(%T) = %#v, want %#v", tt.value, got, tt.want)
 			}
+			if tt.name == "bytes" && (got.Type != BytesType || got.Interface != nil || string(got.Bytes) != "abc") {
+				t.Fatalf("Any([]byte) must use Bytes storage: %#v", got)
+			}
 		})
 	}
 }
