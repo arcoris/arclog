@@ -19,11 +19,17 @@ package field
 import "math"
 
 // Float32 constructs a float32 field preserving the IEEE 754 bit pattern.
+//
+// The math.Float32bits result is stored in Field.Integer. This preserves NaN
+// payloads and infinities; encoders recover the value with math.Float32frombits.
 func Float32(key string, value float32) Field {
 	return Field{Key: key, Type: Float32Type, Integer: int64(math.Float32bits(value))}
 }
 
 // Float64 constructs a float64 field preserving the IEEE 754 bit pattern.
+//
+// The math.Float64bits result is stored in Field.Integer. This preserves NaN
+// payloads and infinities; encoders recover the value with math.Float64frombits.
 func Float64(key string, value float64) Field {
 	return Field{Key: key, Type: Float64Type, Integer: int64(math.Float64bits(value))}
 }

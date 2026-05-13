@@ -39,11 +39,11 @@
 // a threshold and is never a record severity.
 //
 // Fatal is only a severity value in this package. Panic is not a level. Panic
-// behavior, process exit, retry policy, encoder behavior, writer behavior, and
+// behavior, process exit, retry policy, encoder behavior, sink behavior, and
 // runtime side effects are outside this package. Level values do not exit or
 // panic as a side effect.
 //
 // Encoders and exporters may use SeverityNumber and SeverityText for JSON,
 // OTLP, or other display formats, but this API package intentionally does not
-// import encoder, writer, OpenTelemetry, protobuf, or runtime packages.
+// import encoder, sink, OpenTelemetry, protobuf, or runtime packages.
 package level

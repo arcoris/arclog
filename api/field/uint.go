@@ -17,26 +17,38 @@
 package field
 
 // Uint constructs a uint field.
+//
+// The value is stored as a bit-preserving int64 representation in
+// Field.Integer. Encoders recover it with uint(f.Integer).
 func Uint(key string, value uint) Field {
 	return Field{Key: key, Type: UintType, Integer: int64(value)}
 }
 
 // Uint8 constructs a uint8 field.
+//
+// The value is widened to int64 and stored in Field.Integer.
 func Uint8(key string, value uint8) Field {
 	return Field{Key: key, Type: Uint8Type, Integer: int64(value)}
 }
 
 // Uint16 constructs a uint16 field.
+//
+// The value is widened to int64 and stored in Field.Integer.
 func Uint16(key string, value uint16) Field {
 	return Field{Key: key, Type: Uint16Type, Integer: int64(value)}
 }
 
 // Uint32 constructs a uint32 field.
+//
+// The value is widened to int64 and stored in Field.Integer.
 func Uint32(key string, value uint32) Field {
 	return Field{Key: key, Type: Uint32Type, Integer: int64(value)}
 }
 
 // Uint64 constructs a uint64 field.
+//
+// The value is stored as a bit-preserving int64 representation in
+// Field.Integer. Encoders recover it with uint64(f.Integer).
 func Uint64(key string, value uint64) Field {
 	return Field{Key: key, Type: Uint64Type, Integer: int64(value)}
 }

@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package sync
+package sink
 
 import (
 	"errors"
@@ -69,7 +69,7 @@ func TestSinkSyncError(t *testing.T) {
 }
 
 // fakeSink is a small test double that implements Sink without adding
-// production helper implementations to the sync package.
+// production helper implementations to the sink package.
 type fakeSink struct {
 	written  []byte
 	writeN   int

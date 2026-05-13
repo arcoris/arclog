@@ -55,6 +55,9 @@ func (l Level) SeverityText() string {
 
 	n := l.SeverityNumber()
 	if n >= minSeverityNumber && n <= maxSeverityNumber {
+		// Indexes are OpenTelemetry SeverityNumber values. Element zero is left
+		// empty because OTel SeverityNumber 0 is UNSPECIFIED and not a record
+		// severity in arclog.
 		return [...]string{
 			1:  "TRACE",
 			2:  "TRACE2",

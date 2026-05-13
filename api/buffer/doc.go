@@ -17,13 +17,15 @@
 // Package buffer provides a small mutable byte accumulator for encoder hot paths.
 //
 // Buffer is intentionally narrower than bytes.Buffer. It does not implement
-// io.Writer and does not own pooling, synchronization, writer behavior,
+// io.Writer and does not own pooling, synchronization, sink behavior,
 // release/free semantics, or encoding policy. Runtime components decide when a
 // Buffer is acquired, reused, released, or dropped.
 //
 // The zero value is ready to use.
 //
 // A Buffer is not safe for concurrent use.
+// Callers that share encoded bytes across goroutines must synchronize outside
+// this package or copy the bytes first.
 //
 // Bytes returned by Buffer.Bytes are borrowed. Callers must treat them as
 // read-only and must not retain them after the next mutation, Reset, Truncate,

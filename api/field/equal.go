@@ -23,6 +23,10 @@ import (
 )
 
 // Equal reports whether f and other have the same logical field content.
+//
+// Equal is intended for tests and API contract checks, not hot-path logging.
+// BytesType compares Field.Bytes by contents. TimeFullType compares time.Time
+// values with time.Time.Equal when both payloads have the expected type.
 func (f Field) Equal(other Field) bool {
 	if f.Key != other.Key || f.Type != other.Type || f.Integer != other.Integer || f.String != other.String {
 		return false

@@ -17,6 +17,9 @@
 package field
 
 // Null constructs an explicit null field descriptor.
+//
+// Null records the key and NullType. It does not use Interface and it is not
+// the same as Reflect(key, nil) as an encoding decision.
 func Null(key string) Field {
 	return Field{Key: key, Type: NullType}
 }

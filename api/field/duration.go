@@ -19,6 +19,10 @@ package field
 import "time"
 
 // Duration constructs a duration field using nanoseconds.
+//
+// The raw nanosecond count is stored in Field.Integer. Formatting policy, such
+// as rendering as a number, string, or structured duration, belongs to runtime
+// encoders.
 func Duration(key string, value time.Duration) Field {
 	return Field{Key: key, Type: DurationType, Integer: int64(value)}
 }

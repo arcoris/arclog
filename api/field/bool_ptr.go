@@ -17,6 +17,9 @@
 package field
 
 // BoolPtr constructs a field from *bool.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately, so the returned Field does not retain value.
 func BoolPtr(key string, value *bool) Field {
 	if value == nil {
 		return Null(key)

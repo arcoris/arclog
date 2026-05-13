@@ -17,6 +17,9 @@
 package field
 
 // Skip returns the zero field descriptor.
+//
+// Runtime encoders should ignore skipped fields. Constructors that have no
+// useful value to describe, such as Error(nil), may return Skip.
 func Skip() Field {
 	return Field{}
 }

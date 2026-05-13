@@ -22,6 +22,7 @@ import "fmt"
 //
 // The constructor does not call String. Runtime encoders decide when and how
 // to materialize the string representation.
+// Nil and typed-nil stringers become Null(key).
 func Stringer(key string, value fmt.Stringer) Field {
 	if isNil(value) {
 		return Null(key)

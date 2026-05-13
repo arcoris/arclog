@@ -31,16 +31,52 @@ package field
 //
 // Float constructors store IEEE 754 bits in Integer.
 type Field struct {
-	Key       string
-	Type      Type
-	Integer   int64
-	String    string
-	Bytes     []byte
+	// Key is the structured field name.
+	//
+	// Constructors store the key exactly as provided. They do not reject empty
+	// keys, normalize dotted names, sanitize UTF-8, or apply redaction policy.
+	Key string
+
+	// Type selects the active storage slot and value interpretation.
+	//
+	// The zero value is SkipType, so the zero Field is a skipped descriptor.
+	Type Type
+
+	// Integer stores compact numeric and time-like payloads.
+	//
+	// BoolType uses 0 or 1. Signed integer types store their signed value.
+	// Unsigned integer types store a bit-preserving int64 representation.
+	// Float32Type and Float64Type store IEEE 754 bits. DurationType stores
+	// nanoseconds. TimeType stores Unix nanoseconds.
+	Integer int64
+
+	// String stores the payload for StringType.
+	String string
+
+	// Bytes stores the borrowed payload for BytesType.
+	//
+	// The slice aliases caller-owned memory. Encoders that retain a field
+	// beyond the current log call or context-binding operation must copy or
+	// encode the bytes before returning.
+	Bytes []byte
+
+	// Interface stores slow-path and special payloads.
+	//
+	// ErrorType stores error values. StringerType stores fmt.Stringer values.
+	// ReflectType stores arbitrary values. TimeFullType stores time.Time values
+	// that cannot be represented by UnixNano. TimeType stores the original
+	// *time.Location here while Integer stores Unix nanoseconds.
 	Interface any
 }
 
-// IsSkip reports whether f is a no-op field.
+// IsSkip reports whether f is a no-op field descriptor.
+//
+// A skipped field carries no structured value and should be ignored by runtime
+// encoders. The zero value of Field reports true.
 func (f Field) IsSkip() bool { return f.Type == SkipType }
 
-// IsNull reports whether f is an explicit null field.
+// IsNull reports whether f is an explicit null field descriptor.
+//
+// Null is different from Skip: Skip means "no field", while Null means "a
+// field with this key and a null value".
 func (f Field) IsNull() bool { return f.Type == NullType }

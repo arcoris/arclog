@@ -19,6 +19,9 @@ package field
 import "time"
 
 // TimePtr constructs a field from *time.Time.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with Time.
 func TimePtr(key string, value *time.Time) Field {
 	if value == nil {
 		return Null(key)

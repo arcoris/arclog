@@ -17,6 +17,9 @@
 package field
 
 // Bool constructs a boolean field.
+//
+// The value is stored in Field.Integer as 1 for true and 0 for false so the
+// descriptor remains allocation-free and does not need Interface storage.
 func Bool(key string, value bool) Field {
 	var integer int64
 	if value {

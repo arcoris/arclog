@@ -28,6 +28,10 @@ package buffer
 //
 // Buffer is not safe for concurrent use.
 type Buffer struct {
+	// data is the only mutable storage owned by Buffer.
+	//
+	// It is deliberately unexported so callers can observe contents through
+	// Bytes without controlling capacity, growth, truncation, or reuse policy.
 	data []byte
 }
 

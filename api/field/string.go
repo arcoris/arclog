@@ -17,6 +17,9 @@
 package field
 
 // String constructs a string field.
+//
+// The string is stored directly in Field.String. The constructor does not
+// validate UTF-8, escape bytes, intern keys, or choose output quoting.
 func String(key string, value string) Field {
 	return Field{Key: key, Type: StringType, String: value}
 }

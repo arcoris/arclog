@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package sync
+package sink
 
 import (
 	"errors"

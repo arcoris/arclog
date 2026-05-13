@@ -17,6 +17,9 @@
 package field
 
 // Float32Ptr constructs a field from *float32.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with Float32.
 func Float32Ptr(key string, value *float32) Field {
 	if value == nil {
 		return Null(key)
@@ -25,6 +28,9 @@ func Float32Ptr(key string, value *float32) Field {
 }
 
 // Float64Ptr constructs a field from *float64.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with Float64.
 func Float64Ptr(key string, value *float64) Field {
 	if value == nil {
 		return Null(key)

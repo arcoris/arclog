@@ -21,6 +21,7 @@ package field
 // The slice is borrowed and the constructor does not copy it. Callers must not
 // mutate value until the log call or context binding has consumed it. Runtime
 // encoders that retain fields must copy, encode, or bind bytes as needed.
+// Bytes stores value in Field.Bytes and leaves Field.Interface nil.
 func Bytes(key string, value []byte) Field {
 	return Field{Key: key, Type: BytesType, Bytes: value}
 }

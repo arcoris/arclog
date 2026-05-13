@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package sync
+package sink
 
 // Syncer flushes or synchronizes implementation-defined sink state.
 //
@@ -27,15 +27,21 @@ package sync
 // that owns that resource, not the logging API contract.
 type Syncer interface {
 	// Sync flushes or synchronizes implementation-defined sink state.
+	//
+	// Sync must return only after the implementation-specific synchronization
+	// attempt has completed. A nil error means the attempt succeeded according
+	// to that implementation's documented durability and buffering guarantees.
 	Sync() error
 }
 
 // SyncFunc adapts a function to Syncer.
 //
-// A nil SyncFunc is invalid and will panic when Sync is called.
+// SyncFunc is useful for small adapters and tests. A nil SyncFunc is invalid
+// and will panic when Sync is called; callers that need an optional no-op sync
+// should provide an explicit function returning nil.
 type SyncFunc func() error
 
-// Sync calls f.
+// Sync calls f and returns its error unchanged.
 func (f SyncFunc) Sync() error {
 	return f()
 }

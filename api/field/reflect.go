@@ -29,6 +29,10 @@ func Reflect(key string, value any) Field {
 	return Field{Key: key, Type: ReflectType, Interface: value}
 }
 
+// isNil reports whether value is nil or contains a typed nil.
+//
+// The helper is intentionally local to api/field so this descriptor package
+// does not grow an internal dependency just to detect nil interface payloads.
 func isNil(value any) bool {
 	if value == nil {
 		return true

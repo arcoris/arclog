@@ -22,6 +22,13 @@ import (
 )
 
 // Any chooses a typed field constructor for value and falls back to Reflect.
+//
+// Any is a convenience boundary for dynamic values. It does not introduce an
+// AnyType storage kind: supported concrete Go types become the same descriptors
+// produced by the typed constructors, and unsupported values become Reflect.
+// Hot paths with statically known value types should call typed constructors
+// directly, especially for []byte where interface boxing can allocate before
+// Any receives the value.
 func Any(key string, value any) Field {
 	if value == nil {
 		return Null(key)

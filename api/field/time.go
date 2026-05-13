@@ -19,6 +19,8 @@ package field
 import "time"
 
 const (
+	// minUnixNano and maxUnixNano bound the compact TimeType representation.
+	// Values outside this UnixNano range are stored as TimeFullType.
 	minUnixNano = -1 << 63
 	maxUnixNano = 1<<63 - 1
 )
@@ -33,6 +35,7 @@ var (
 // Values representable as Unix nanoseconds use the compact form and preserve
 // the original location separately. Values outside that range retain the full
 // time.Time value.
+// The constructor does not decide timestamp formatting or timezone rendering.
 func Time(key string, value time.Time) Field {
 	if value.Before(minTime) || value.After(maxTime) {
 		return Field{Key: key, Type: TimeFullType, Interface: value}

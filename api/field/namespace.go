@@ -20,6 +20,8 @@ package field
 //
 // Namespace is descriptor-only. Runtime encoders decide how namespace scopes
 // are opened and closed in their own output formats.
+// The descriptor does not carry closing behavior, child fields, or encoding
+// policy.
 func Namespace(key string) Field {
 	return Field{Key: key, Type: NamespaceType}
 }

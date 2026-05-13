@@ -40,7 +40,8 @@ func (b *Buffer) Cap() int {
 // The returned slice aliases the buffer's internal storage. The bytes are
 // borrowed: callers must treat them as read-only and must not retain them after
 // the next mutation, Reset, Truncate, Grow that reallocates, or runtime release
-// by an owner outside this package.
+// by an owner outside this package. Code that sends bytes to asynchronous sinks
+// must copy the slice before returning the Buffer to a pool.
 func (b *Buffer) Bytes() []byte {
 	return b.data
 }

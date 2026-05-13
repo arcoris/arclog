@@ -120,6 +120,9 @@ const (
 	fatal3 Level = 14
 	fatal4 Level = 15
 
+	// maxSeverity is the highest valid record severity in the shifted OTel
+	// range. Off intentionally sits outside this range as a threshold-only
+	// sentinel.
 	maxSeverity = fatal4
 )
 

@@ -17,6 +17,9 @@
 package field
 
 // StringPtr constructs a field from *string.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with String.
 func StringPtr(key string, value *string) Field {
 	if value == nil {
 		return Null(key)

@@ -17,11 +17,18 @@
 package field
 
 // Error constructs an error field using the default key "error".
+//
+// Nil and typed-nil errors produce Skip because there is no error value to
+// attach. Non-nil errors are stored as ErrorType in Field.Interface. The
+// constructor does not call Error; string conversion belongs to encoders.
 func Error(err error) Field {
 	return NamedError("error", err)
 }
 
 // NamedError constructs an error field using key.
+//
+// Nil and typed-nil errors produce Skip. The key is stored exactly as provided
+// for non-nil errors.
 func NamedError(key string, err error) Field {
 	if isNil(err) {
 		return Skip()

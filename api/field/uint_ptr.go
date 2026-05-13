@@ -17,6 +17,9 @@
 package field
 
 // UintPtr constructs a field from *uint.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with Uint.
 func UintPtr(key string, value *uint) Field {
 	if value == nil {
 		return Null(key)
@@ -25,6 +28,9 @@ func UintPtr(key string, value *uint) Field {
 }
 
 // Uint8Ptr constructs a field from *uint8.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with Uint8.
 func Uint8Ptr(key string, value *uint8) Field {
 	if value == nil {
 		return Null(key)
@@ -33,6 +39,9 @@ func Uint8Ptr(key string, value *uint8) Field {
 }
 
 // Uint16Ptr constructs a field from *uint16.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with Uint16.
 func Uint16Ptr(key string, value *uint16) Field {
 	if value == nil {
 		return Null(key)
@@ -41,6 +50,9 @@ func Uint16Ptr(key string, value *uint16) Field {
 }
 
 // Uint32Ptr constructs a field from *uint32.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with Uint32.
 func Uint32Ptr(key string, value *uint32) Field {
 	if value == nil {
 		return Null(key)
@@ -49,6 +61,9 @@ func Uint32Ptr(key string, value *uint32) Field {
 }
 
 // Uint64Ptr constructs a field from *uint64.
+//
+// A nil pointer becomes Null(key). A non-nil pointer is dereferenced
+// immediately and stored with Uint64.
 func Uint64Ptr(key string, value *uint64) Field {
 	if value == nil {
 		return Null(key)

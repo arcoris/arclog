@@ -14,16 +14,18 @@
    limitations under the License.
 */
 
-package sync
+package sink
 
 import "io"
 
-// Sink is an encoded log payload sink.
+// Sink consumes already encoded log payload bytes.
 //
 // Sink is intentionally a composition of io.Writer and Syncer so implementations
 // can use the familiar Write and Sync method set. Despite using io.Writer,
-// Sink is not a general-purpose writer wrapper: Write receives already encoded
-// arclog payload bytes.
+// Sink is not a general-purpose writer wrapper: Write receives complete arclog
+// payload bytes after runtime encoding has already happened. A Sink should not
+// inspect field descriptors, choose JSON formatting, map values to OTLP, or
+// write through api/buffer directly.
 //
 // The slice passed to Write is borrowed and may alias a pooled runtime buffer.
 // Implementations must consume p before Write returns, must not mutate p, and
@@ -32,7 +34,9 @@ import "io"
 // before returning when the bytes will be consumed later. Callers may reuse or
 // release the backing storage immediately after Write returns.
 //
-// Sync flushes or synchronizes implementation-defined sink state.
+// Sync flushes or synchronizes implementation-defined sink state. It does not
+// imply a specific durability level unless the concrete implementation
+// documents one.
 //
 // Sink does not imply concurrency safety. A concrete implementation or wrapper
 // must document and provide any required synchronization.
